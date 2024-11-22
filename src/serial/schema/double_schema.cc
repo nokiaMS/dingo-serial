@@ -127,6 +127,7 @@ void DingoSchema<std::optional<double>>::SetAllowNull(bool allow_null) { this->a
 bool DingoSchema<std::optional<double>>::AllowNull() { return allow_null_; }
 
 void DingoSchema<std::optional<double>>::SetIsLe(bool le) { this->le_ = le; }
+bool DingoSchema<std::optional<double>>::GetIsLe() { return this->le_; }
 
 void DingoSchema<std::optional<double>>::EncodeKey(Buf* buf, std::optional<double> data) {
   if (this->allow_null_) {

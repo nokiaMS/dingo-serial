@@ -12,29 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_DINGO_SCHEMA_H_
-#define DINGO_SERIAL_DINGO_SCHEMA_H_
+#ifndef DINGO_SCHEMA_CONVERTER_H_
+#define DINGO_SCHEMA_CONVERTER_H_
+#include <any>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "serial/utils/buf.h"
+#include "serial/record/record_encoder.h"
+#include "serial/recordV2/record_encoder.h"
 #include "serial/schema/base_schema.h"
+#include "serial/utilsV2/compiler.h"
 
 namespace dingodb {
 
-template <class T>
-class DingoSchema : public BaseSchema {
- public:
-  virtual void SetIndex(int index) = 0;
-  virtual void SetIsKey(bool key) = 0;
-  virtual void SetAllowNull(bool allow_null) = 0;
-  virtual void EncodeKey(Buf* buf, T data) = 0;
-  virtual void EncodeKeyPrefix(Buf* buf, T data) = 0;
-  virtual T DecodeKey(Buf* buf) = 0;
-  virtual void SkipKey(Buf* buf) = 0;
-  virtual void EncodeValue(Buf* buf, T data) = 0;
-  virtual T DecodeValue(Buf* buf) = 0;
-  virtual void SkipValue(Buf* buf) = 0;
-};
+std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> ConvertSchemas2V1(
+  const std::vector<V2::BaseSchemaPtr>& schemas);
 
-}  // namespace dingodb
+}
 
 #endif

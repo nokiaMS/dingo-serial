@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "serial/record_encoder.h"
+#include "record_encoder.h"
 
 #include <sys/types.h>
 
@@ -21,7 +21,7 @@
 #include <string>
 
 // #include "common/helper.h"
-#include "serial/keyvalue.h"  // IWYU pragma: keep
+#include "serial/utils/keyvalue.h"  // IWYU pragma: keep
 
 namespace dingodb {
 
@@ -31,19 +31,19 @@ static int64_t StringToInt64(const std::string& str) { return std::strtoll(str.c
 static float StringToFloat(const std::string& str) { return std::strtof(str.c_str(), nullptr); }
 static double StringToDouble(const std::string& str) { return std::strtod(str.c_str(), nullptr); }
 
-RecordEncoder::RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+RecordEncoderV1::RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                              long common_id) {
   this->le_ = IsLE();
   Init(schema_version, schemas, common_id);
 }
 
-RecordEncoder::RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+RecordEncoderV1::RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                              long common_id, bool le) {
   this->le_ = le;
   Init(schema_version, schemas, common_id);
 }
 
-void RecordEncoder::Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+void RecordEncoderV1::Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                          long common_id) {
   this->schema_version_ = schema_version;
   FormatSchema(schemas, this->le_);
@@ -55,21 +55,21 @@ void RecordEncoder::Init(int schema_version, std::shared_ptr<std::vector<std::sh
   delete[] size;
 }
 
-void RecordEncoder::EncodePrefix(Buf& buf, char prefix) const {
+void RecordEncoderV1::EncodePrefix(Buf& buf, char prefix) const {
   buf.Write(prefix);
   buf.WriteLong(common_id_);
 }
 
-void RecordEncoder::EncodeReverseTag(Buf& buf) const {
+void RecordEncoderV1::EncodeReverseTag(Buf& buf) const {
   buf.ReverseWrite(codec_version_);
   buf.ReverseWrite(0);
   buf.ReverseWrite(0);
   buf.ReverseWrite(0);
 }
 
-void RecordEncoder::EncodeSchemaVersion(Buf& buf) const { buf.WriteInt(schema_version_); }
+void RecordEncoderV1::EncodeSchemaVersion(Buf& buf) const { buf.WriteInt(schema_version_); }
 
-int RecordEncoder::Encode(char prefix, const std::vector<std::any>& record, std::string& key, std::string& value) {
+int RecordEncoderV1::Encode(char prefix, const std::vector<std::any>& record, std::string& key, std::string& value) {
   int ret = EncodeKey(prefix, record, key);
   if (ret < 0) {
     return ret;
@@ -81,7 +81,7 @@ int RecordEncoder::Encode(char prefix, const std::vector<std::any>& record, std:
   return 0;
 }
 
-int RecordEncoder::EncodeKey(char prefix, const std::vector<std::any>& record, std::string& output) {
+int RecordEncoderV1::EncodeKey(char prefix, const std::vector<std::any>& record, std::string& output) {
   Buf buf(key_buf_size_, this->le_);
   // |namespace|id| ... |tag|
   buf.EnsureRemainder(13);
@@ -145,7 +145,7 @@ int RecordEncoder::EncodeKey(char prefix, const std::vector<std::any>& record, s
   return buf.GetBytes(output);
 }
 
-int RecordEncoder::EncodeValue(const std::vector<std::any>& record, std::string& output) {
+int RecordEncoderV1::EncodeValue(const std::vector<std::any>& record, std::string& output) {
   Buf buf(value_buf_size_, this->le_);
   buf.EnsureRemainder(4);
   EncodeSchemaVersion(buf);
@@ -256,7 +256,7 @@ int RecordEncoder::EncodeValue(const std::vector<std::any>& record, std::string&
   return buf.GetBytes(output);
 }
 
-int RecordEncoder::EncodeKeyPrefix(char prefix, const std::vector<std::any>& record, int column_count,
+int RecordEncoderV1::EncodeKeyPrefix(char prefix, const std::vector<std::any>& record, int column_count,
                                    std::string& output) {
   Buf buf(key_buf_size_, this->le_);
   buf.EnsureRemainder(9);
@@ -322,7 +322,7 @@ int RecordEncoder::EncodeKeyPrefix(char prefix, const std::vector<std::any>& rec
   return buf.GetBytes(output);
 }
 
-int RecordEncoder::EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys, std::string& output) {
+int RecordEncoderV1::EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys, std::string& output) {
   Buf buf(key_buf_size_, this->le_);
   buf.EnsureRemainder(9);
   EncodePrefix(buf, prefix);
@@ -389,7 +389,7 @@ int RecordEncoder::EncodeKeyPrefix(char prefix, const std::vector<std::string>& 
   return buf.GetBytes(output);
 }
 
-int RecordEncoder::EncodeMaxKeyPrefix(char prefix, std::string& output) const {
+int RecordEncoderV1::EncodeMaxKeyPrefix(char prefix, std::string& output) const {
   if (common_id_ == INT64_MAX) {
     return -1;
   }
@@ -401,7 +401,7 @@ int RecordEncoder::EncodeMaxKeyPrefix(char prefix, std::string& output) const {
   return buf.GetBytes(output);
 }
 
-int RecordEncoder::EncodeMinKeyPrefix(char prefix, std::string& output) const {
+int RecordEncoderV1::EncodeMinKeyPrefix(char prefix, std::string& output) const {
   Buf buf(key_buf_size_, this->le_);
   buf.EnsureRemainder(9);
   buf.Write(prefix);

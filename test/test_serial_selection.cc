@@ -14,9 +14,9 @@
 
 #include <byteswap.h>
 #include <gtest/gtest.h>
-#include <serial/record_decoder.h>
-#include <serial/record_encoder.h>
-#include <serial/utils.h>
+#include <serial/record/record_decoder.h>
+#include <serial/record/record_encoder.h>
+#include <serial/utils/utils.h>
 
 #include <memory>
 #include <optional>
@@ -117,7 +117,8 @@ class DingoSerialTest : public testing::Test {
     optional<int64_t> score = 214748364700L;
     std::shared_ptr<std::string> addr = std::make_shared<std::string>(
         "test address test 中文 表情😊🏷️👌 test "
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测试"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测"
+        "试"
         "测"
         "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫");
     optional<bool> exist = false;
@@ -140,19 +141,24 @@ class DingoSerialTest : public testing::Test {
     record_->at(10) = salary;
   }
   void DeleteRecords() const {
-    optional<shared_ptr<string>> name = any_cast<optional<shared_ptr<string>>>(record_->at(1));
+    optional<shared_ptr<string>> name =
+        any_cast<optional<shared_ptr<string>>>(record_->at(1));
     if (name.has_value()) {
     }
-    optional<shared_ptr<string>> gender = any_cast<optional<shared_ptr<string>>>(record_->at(2));
+    optional<shared_ptr<string>> gender =
+        any_cast<optional<shared_ptr<string>>>(record_->at(2));
     if (gender.has_value()) {
     }
-    optional<shared_ptr<string>> addr = any_cast<optional<shared_ptr<string>>>(record_->at(4));
+    optional<shared_ptr<string>> addr =
+        any_cast<optional<shared_ptr<string>>>(record_->at(4));
     if (addr.has_value()) {
     }
     record_->clear();
     record_->shrink_to_fit();
   }
-  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const { return schemas_; }
+  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const {
+    return schemas_;
+  }
   vector<any>* GetRecord() const { return record_; }
 
  protected:
@@ -168,7 +174,8 @@ TEST_F(DingoSerialTest, keyvaluecodeStringLoopTest) {
   std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> schemas =
       std::make_shared<vector<std::shared_ptr<BaseSchema>>>(n);
   for (int i = 0; i < n; i++) {
-    std::shared_ptr<std::string> column_value = std::make_shared<std::string>("value_" + std::to_string(i));
+    std::shared_ptr<std::string> column_value =
+        std::make_shared<std::string>("value_" + std::to_string(i));
     auto str = std::make_shared<DingoSchema<optional<shared_ptr<string>>>>();
     str->SetIndex(i);
     str->SetAllowNull(false);
@@ -178,7 +185,8 @@ TEST_F(DingoSerialTest, keyvaluecodeStringLoopTest) {
   }
   ASSERT_EQ(n, record1.size());
   // encode record
-  std::shared_ptr<RecordEncoder> re = std::make_shared<RecordEncoder>(0, schemas, 0L, this->le);
+  std::shared_ptr<RecordEncoderV1> re =
+      std::make_shared<RecordEncoderV1>(0, schemas, 0L, this->le);
   std::string key;
   std::string value;
   Counter load_cnter1;
@@ -187,12 +195,14 @@ TEST_F(DingoSerialTest, keyvaluecodeStringLoopTest) {
   int64_t time_db_fetch1 = load_cnter1.MtimeElapsed();
   std::cout << "Encode Time : " << time_db_fetch1 << " milliseconds" << '\n';
   // Decode record and verify values
-  std::shared_ptr<RecordDecoder> rd = std::make_shared<RecordDecoder>(0, schemas, 0L, this->le);
+  std::shared_ptr<RecordDecoderV1> rd =
+      std::make_shared<RecordDecoderV1>(0, schemas, 0L, this->le);
   std::vector<std::any> decoded_records;
   Counter load_cnter2;
   load_cnter2.ReStart();
   (void)rd->Decode(key, value, decoded_records);
-  std::cout << "Decode Time : " << load_cnter2.MtimeElapsed() << " milliseconds" << '\n';
+  std::cout << "Decode Time : " << load_cnter2.MtimeElapsed() << " milliseconds"
+            << '\n';
   std::cout << "Decode output records size:" << decoded_records.size() << '\n';
 
   // Decode record selection columns
@@ -210,8 +220,10 @@ TEST_F(DingoSerialTest, keyvaluecodeStringLoopTest) {
     // std::sort(column_indexes.begin(), column_indexes.end());
     (void)rd->Decode(key, value, column_indexes, decoded_s_records);
     std::cout << "Decode selection columns size:" << selection_columns_size
-              << ", need Time : " << load_cnter3.MtimeElapsed() << " milliseconds" << '\n';
-    std::cout << "Decode selection output records size:" << decoded_s_records.size() << '\n';
+              << ", need Time : " << load_cnter3.MtimeElapsed()
+              << " milliseconds" << '\n';
+    std::cout << "Decode selection output records size:"
+              << decoded_s_records.size() << '\n';
   }
   {
     std::vector<int> indexes;
@@ -227,7 +239,9 @@ TEST_F(DingoSerialTest, keyvaluecodeStringLoopTest) {
     // std::sort(column_indexes.begin(), column_indexes.end());
     (void)rd->Decode(key, value, column_indexes, decoded_s_records);
     std::cout << "Decode selection columns size:" << selection_columns_size
-              << ", need Time : " << load_cnter3.MtimeElapsed() << " milliseconds" << '\n';
-    std::cout << "Decode selection output records size:" << decoded_s_records.size() << '\n';
+              << ", need Time : " << load_cnter3.MtimeElapsed()
+              << " milliseconds" << '\n';
+    std::cout << "Decode selection output records size:"
+              << decoded_s_records.size() << '\n';
   }
 }

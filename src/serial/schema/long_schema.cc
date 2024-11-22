@@ -109,6 +109,7 @@ void DingoSchema<std::optional<int64_t>>::SetAllowNull(bool allow_null) { this->
 bool DingoSchema<std::optional<int64_t>>::AllowNull() { return this->allow_null_; }
 
 void DingoSchema<std::optional<int64_t>>::SetIsLe(bool le) { this->le_ = le; }
+bool DingoSchema<std::optional<int64_t>>::GetIsLe() { return this->le_; }
 
 void DingoSchema<std::optional<int64_t>>::EncodeKey(Buf* buf, std::optional<int64_t> data) {
   if (this->allow_null_) {

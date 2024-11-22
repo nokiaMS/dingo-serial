@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "serial/buf.h"
+#include "serial/utils/buf.h"
 
-#include "serial/utils.h"
+#include "serial/utils/utils.h"
 
 namespace dingodb {
 
@@ -187,6 +187,7 @@ int64_t Buf::PeekLong() {
 }
 
 uint8_t Buf::Read() { return buf_.at(forward_pos_++); }
+uint8_t Buf::ReversePeek() { return buf_.at(reverse_pos_); }
 
 int32_t Buf::ReadInt() {
   if (this->le_) {

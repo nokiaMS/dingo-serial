@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "serial/record_decoder.h"
+#include "record_decoder.h"
 
 #include <cstdint>
 #include <memory>
@@ -65,19 +65,19 @@ CastAndDecodeOrSkipFuncPointer cast_and_decode_or_skip_func_ptrs[] = {
     CastAndDecodeOrSkip<std::shared_ptr<std::vector<std::string>>>,
 };
 
-RecordDecoder::RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+RecordDecoderV1::RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                              long common_id) {
   this->le_ = IsLE();
   Init(schema_version, schemas, common_id);
 }
 
-RecordDecoder::RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+RecordDecoderV1::RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                              long common_id, bool le) {
   this->le_ = le;
   Init(schema_version, schemas, common_id);
 }
 
-void RecordDecoder::Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+void RecordDecoderV1::Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
                          long common_id) {
   this->schema_version_ = schema_version;
   FormatSchema(schemas, this->le_);
@@ -85,13 +85,13 @@ void RecordDecoder::Init(int schema_version, std::shared_ptr<std::vector<std::sh
   this->common_id_ = common_id;
 }
 
-bool RecordDecoder::CheckPrefix(Buf& buf) const {
+bool RecordDecoderV1::CheckPrefix(Buf& buf) const {
   // skip name space
   buf.Skip(1);
   return buf.ReadLong() == common_id_;
 }
 
-bool RecordDecoder::CheckReverseTag(Buf& buf) const {
+bool RecordDecoderV1::CheckReverseTag(Buf& buf) const {
   if (buf.ReverseRead() <= codec_version_) {
     buf.ReverseSkip(3);
     return true;
@@ -99,7 +99,9 @@ bool RecordDecoder::CheckReverseTag(Buf& buf) const {
   return false;
 }
 
-bool RecordDecoder::CheckSchemaVersion(Buf& buf) const { return buf.ReadInt() <= schema_version_; }
+bool RecordDecoderV1::CheckSchemaVersion(Buf& buf) const { return buf.ReadInt() <= schema_version_; }
+
+int GetCodecVersion(Buf& buf) { return buf.ReversePeek(); }
 
 void DecodeOrSkip(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& value_buf,
                   std::vector<std::any>& record, int record_index, bool skip) {
@@ -107,7 +109,7 @@ void DecodeOrSkip(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& 
                                                                          record_index, skip);
 }
 
-int RecordDecoder::Decode(const std::string& key, const std::string& value, std::vector<std::any>& record) {
+int RecordDecoderV1::Decode(const std::string& key, const std::string& value, std::vector<std::any>& record) {
   Buf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
   if (!CheckPrefix(key_buf)) {
@@ -135,7 +137,7 @@ int RecordDecoder::Decode(const std::string& key, const std::string& value, std:
   return 0;
 }
 
-int RecordDecoder::DecodeKey(const std::string& key, std::vector<std::any>& record /*output*/) {
+int RecordDecoderV1::DecodeKey(const std::string& key, std::vector<std::any>& record /*output*/) {
   Buf key_buf(key, this->le_);
 
   if (!CheckPrefix(key_buf)) {
@@ -160,7 +162,7 @@ int RecordDecoder::DecodeKey(const std::string& key, std::vector<std::any>& reco
   return 0;
 }
 
-int RecordDecoder::Decode(const KeyValue& key_value, std::vector<std::any>& record) {
+int RecordDecoderV1::Decode(const KeyValue& key_value, std::vector<std::any>& record) {
   return Decode(*key_value.GetKey(), *key_value.GetValue(), record);
 }
 
@@ -178,7 +180,7 @@ inline bool IsSkipOnly(const std::vector<std::pair<int32_t, int32_t>>& indexed_m
   }
 }
 
-int RecordDecoder::Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
+int RecordDecoderV1::Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
                           std::vector<std::any>& record) {
   Buf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
@@ -220,7 +222,7 @@ int RecordDecoder::Decode(const std::string& key, const std::string& value, cons
   return 0;
 }
 
-int RecordDecoder::Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
+int RecordDecoderV1::Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
                           std::vector<std::any>& record) {
   return Decode(*key_value.GetKey(), *key_value.GetValue(), column_indexes, record);
 }

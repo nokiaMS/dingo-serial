@@ -21,7 +21,7 @@
 #include "any"
 #include "functional"         // IWYU pragma: keep
 #include "optional"           // IWYU pragma: keep
-#include "serial/keyvalue.h"  // IWYU pragma: keep
+#include "serial/utils/keyvalue.h"  // IWYU pragma: keep
 #include "serial/schema/boolean_list_schema.h"
 #include "serial/schema/boolean_schema.h"  // IWYU pragma: keep
 #include "serial/schema/double_list_schema.h"
@@ -34,11 +34,11 @@
 #include "serial/schema/long_schema.h"  // IWYU pragma: keep
 #include "serial/schema/string_list_schema.h"
 #include "serial/schema/string_schema.h"  // IWYU pragma: keep
-#include "serial/utils.h"                 // IWYU pragma: keep
+#include "serial/utils/utils.h"                 // IWYU pragma: keep
 
 namespace dingodb {
 
-class RecordEncoder {
+class RecordEncoderV1 {
  private:
   void EncodePrefix(Buf& buf, char prefix) const;
   void EncodeReverseTag(Buf& buf) const;
@@ -53,8 +53,8 @@ class RecordEncoder {
   bool le_;
 
  public:
-  RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
+  RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
                 bool le);
 
   void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);

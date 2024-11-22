@@ -19,7 +19,7 @@
 
 #include "any"
 #include "functional"
-#include "keyvalue.h"
+#include "../utils/keyvalue.h"
 #include "optional"
 #include "serial/schema/boolean_list_schema.h"
 #include "serial/schema/boolean_schema.h"
@@ -33,11 +33,11 @@
 #include "serial/schema/long_schema.h"
 #include "serial/schema/string_list_schema.h"
 #include "serial/schema/string_schema.h"
-#include "serial/utils.h"
+#include "serial/utils/utils.h"
 
 namespace dingodb {
 
-class RecordDecoder {
+class RecordDecoderV1 {
  private:
   bool CheckPrefix(Buf& buf) const;
   bool CheckReverseTag(Buf& buf) const;
@@ -50,8 +50,8 @@ class RecordDecoder {
   bool le_;
 
  public:
-  RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
+  RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
                 bool le);
 
   void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
@@ -64,6 +64,7 @@ class RecordDecoder {
              std::vector<std::any>& record /*output*/);
   int Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
              std::vector<std::any>& record /*output*/);
+  int GetCodecVersion();
 };
 
 }  // namespace dingodb

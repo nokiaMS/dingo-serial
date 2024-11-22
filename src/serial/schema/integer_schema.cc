@@ -81,6 +81,7 @@ void DingoSchema<std::optional<int32_t>>::SetAllowNull(bool allow_null) { this->
 bool DingoSchema<std::optional<int32_t>>::AllowNull() { return this->allow_null_; }
 
 void DingoSchema<std::optional<int32_t>>::SetIsLe(bool le) { this->le_ = le; }
+bool DingoSchema<std::optional<int32_t>>::GetIsLe() { return this->le_; }
 
 void DingoSchema<std::optional<int32_t>>::EncodeKey(Buf* buf, std::optional<int32_t> data) {
   if (this->allow_null_) {

@@ -14,9 +14,9 @@
 
 #include <byteswap.h>
 #include <gtest/gtest.h>
-#include <serial/record_decoder.h>
-#include <serial/record_encoder.h>
-#include <serial/utils.h>
+#include <serial/record/record_decoder.h>
+#include <serial/record/record_encoder.h>
+#include <serial/utils/utils.h>
 
 #include <algorithm>
 #include <bitset>
@@ -105,85 +105,99 @@ class DingoSerialListTypeTest : public testing::Test {
     salary->SetIsKey(false);
     schemas_->at(10) = salary;
 
-    auto boollist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<bool>>>>>();
+    auto boollist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<bool>>>>>();
     boollist_null->SetIndex(11);
     boollist_null->SetAllowNull(true);
     boollist_null->SetIsKey(false);
     schemas_->at(11) = boollist_null;
 
-    auto boollist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<bool>>>>>();
+    auto boollist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<bool>>>>>();
     boollist->SetIndex(12);
     boollist->SetAllowNull(false);
     boollist->SetIsKey(false);
     schemas_->at(12) = boollist;
 
-    auto stringlist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
+    auto stringlist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
     stringlist_null->SetIndex(13);
     stringlist_null->SetAllowNull(true);
     stringlist_null->SetIsKey(false);
     schemas_->at(13) = stringlist_null;
 
-    auto stringlist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
+    auto stringlist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
     stringlist->SetIndex(14);
     stringlist->SetAllowNull(false);
     stringlist->SetIsKey(false);
     schemas_->at(14) = stringlist;
 
-    auto doublelist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<double>>>>>();
+    auto doublelist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<double>>>>>();
     doublelist_null->SetIndex(15);
     doublelist_null->SetAllowNull(true);
     doublelist_null->SetIsKey(false);
     schemas_->at(15) = doublelist_null;
 
-    auto doublelist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<double>>>>>();
+    auto doublelist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<double>>>>>();
     doublelist->SetIndex(16);
     doublelist->SetAllowNull(false);
     doublelist->SetIsKey(false);
     schemas_->at(16) = doublelist;
 
-    auto floatlist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<float>>>>>();
+    auto floatlist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<float>>>>>();
     floatlist_null->SetIndex(17);
     floatlist_null->SetAllowNull(true);
     floatlist_null->SetIsKey(false);
     schemas_->at(17) = floatlist_null;
 
-    auto floatlist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<float>>>>>();
+    auto floatlist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<float>>>>>();
     floatlist->SetIndex(18);
     floatlist->SetAllowNull(false);
     floatlist->SetIsKey(false);
     schemas_->at(18) = floatlist;
 
-    auto integerlist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<int32_t>>>>>();
+    auto integerlist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<int32_t>>>>>();
     integerlist_null->SetIndex(19);
     integerlist_null->SetAllowNull(true);
     integerlist_null->SetIsKey(false);
     schemas_->at(19) = integerlist_null;
 
-    auto integerlist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<int32_t>>>>>();
+    auto integerlist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<int32_t>>>>>();
     integerlist->SetIndex(20);
     integerlist->SetAllowNull(false);
     integerlist->SetIsKey(false);
     schemas_->at(20) = integerlist;
 
-    auto longlist_null = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<int64_t>>>>>();
+    auto longlist_null = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<int64_t>>>>>();
     longlist_null->SetIndex(21);
     longlist_null->SetAllowNull(true);
     longlist_null->SetIsKey(false);
     schemas_->at(21) = longlist_null;
 
-    auto longlist = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<int64_t>>>>>();
+    auto longlist = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<int64_t>>>>>();
     longlist->SetIndex(22);
     longlist->SetAllowNull(false);
     longlist->SetIsKey(false);
     schemas_->at(22) = longlist;
 
-    auto stringlist_null1 = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
+    auto stringlist_null1 = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
     stringlist_null1->SetIndex(23);
     stringlist_null1->SetAllowNull(true);
     stringlist_null1->SetIsKey(false);
     schemas_->at(23) = stringlist_null1;
 
-    auto stringlist1 = std::make_shared<DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
+    auto stringlist1 = std::make_shared<
+        DingoSchema<optional<std::shared_ptr<std::vector<std::string>>>>>();
     stringlist1->SetIndex(24);
     stringlist1->SetAllowNull(false);
     stringlist1->SetIsKey(false);
@@ -203,7 +217,8 @@ class DingoSerialListTypeTest : public testing::Test {
     optional<int64_t> score = 214748364700L;
     std::shared_ptr<std::string> addr = std::make_shared<std::string>(
         "test address test 中文 表情😊🏷️👌 test "
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测试"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测"
+        "试"
         "测"
         "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫");
     optional<bool> exist = false;
@@ -213,40 +228,50 @@ class DingoSerialListTypeTest : public testing::Test {
     optional<int64_t> prev = -214748364700L;
     optional<double> salary = 873485.4234;
 
-    optional<std::shared_ptr<std::vector<bool>>> bool1 = std::make_shared<std::vector<bool>>(std::vector<bool>{});
+    optional<std::shared_ptr<std::vector<bool>>> bool1 =
+        std::make_shared<std::vector<bool>>(std::vector<bool>{});
     optional<std::shared_ptr<std::vector<bool>>> bool2 =
-        std::make_shared<std::vector<bool>>(std::vector<bool>{true, false, false, false, true});
+        std::make_shared<std::vector<bool>>(
+            std::vector<bool>{true, false, false, false, true});
 
     optional<std::shared_ptr<std::vector<std::string>>> string1 =
         std::make_shared<std::vector<std::string>>(std::vector<std::string>{});
     optional<std::shared_ptr<std::vector<std::string>>> string2 =
-        std::make_shared<std::vector<std::string>>(std::vector<std::string>{"qwe", "中文"});
+        std::make_shared<std::vector<std::string>>(
+            std::vector<std::string>{"qwe", "中文"});
 
     optional<std::shared_ptr<std::vector<double>>> double1 =
         std::make_shared<std::vector<double>>(std::vector<double>{});
-    optional<std::shared_ptr<std::vector<double>>> double2 = std::make_shared<std::vector<double>>(
-        std::vector<double>{3323232333.21221, 23232.2111111, 222334455566.23, 2222, 67889.246});
+    optional<std::shared_ptr<std::vector<double>>> double2 =
+        std::make_shared<std::vector<double>>(std::vector<double>{
+            3323232333.21221, 23232.2111111, 222334455566.23, 2222, 67889.246});
 
-    optional<std::shared_ptr<std::vector<float>>> float1 = std::make_shared<std::vector<float>>(std::vector<float>{});
+    optional<std::shared_ptr<std::vector<float>>> float1 =
+        std::make_shared<std::vector<float>>(std::vector<float>{});
     optional<std::shared_ptr<std::vector<float>>> float2 =
-        std::make_shared<std::vector<float>>(std::vector<float>{33232.21221, 23232.2111111, 2222, 67889.246});
+        std::make_shared<std::vector<float>>(
+            std::vector<float>{33232.21221, 23232.2111111, 2222, 67889.246});
 
     optional<std::shared_ptr<std::vector<int32_t>>> int1 =
         std::make_shared<std::vector<int32_t>>(std::vector<int32_t>{});
     optional<std::shared_ptr<std::vector<int32_t>>> int2 =
-        std::make_shared<std::vector<int32_t>>(std::vector<int32_t>{33232, 2111111, 2222, 246});
+        std::make_shared<std::vector<int32_t>>(
+            std::vector<int32_t>{33232, 2111111, 2222, 246});
 
     optional<std::shared_ptr<std::vector<int64_t>>> long1 =
         std::make_shared<std::vector<int64_t>>(std::vector<int64_t>{});
     optional<std::shared_ptr<std::vector<int64_t>>> long2 =
-        std::make_shared<std::vector<int64_t>>(std::vector<int64_t>{33232998776555l, 2111111l, 2222l, 2469999883732l});
+        std::make_shared<std::vector<int64_t>>(std::vector<int64_t>{
+            33232998776555l, 2111111l, 2222l, 2469999883732l});
 
-    optional<std::shared_ptr<std::vector<std::string>>> string3 = std::make_shared<
-        std::vector<std::string>>(std::vector<std::string>{
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测试",
-        "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫"});
-    optional<std::shared_ptr<std::vector<std::string>>> string4 = std::make_shared<std::vector<std::string>>(
-        std::vector<std::string>{"test address test 中文 表情😊🏷️👌 test ", "中文"});
+    optional<std::shared_ptr<std::vector<std::string>>> string3 =
+        std::make_shared<std::vector<std::string>>(std::vector<std::string>{
+            "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测"
+            "试",
+            "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫"});
+    optional<std::shared_ptr<std::vector<std::string>>> string4 =
+        std::make_shared<std::vector<std::string>>(std::vector<std::string>{
+            "test address test 中文 表情😊🏷️👌 test ", "中文"});
 
     record_->at(0) = id;
     record_->at(1) = optional<shared_ptr<string>>{name};
@@ -275,19 +300,24 @@ class DingoSerialListTypeTest : public testing::Test {
     record_->at(24) = string4;
   }
   void DeleteRecords() const {
-    optional<shared_ptr<string>> name = any_cast<optional<shared_ptr<string>>>(record_->at(1));
+    optional<shared_ptr<string>> name =
+        any_cast<optional<shared_ptr<string>>>(record_->at(1));
     if (name.has_value()) {
     }
-    optional<shared_ptr<string>> gender = any_cast<optional<shared_ptr<string>>>(record_->at(2));
+    optional<shared_ptr<string>> gender =
+        any_cast<optional<shared_ptr<string>>>(record_->at(2));
     if (gender.has_value()) {
     }
-    optional<shared_ptr<string>> addr = any_cast<optional<shared_ptr<string>>>(record_->at(4));
+    optional<shared_ptr<string>> addr =
+        any_cast<optional<shared_ptr<string>>>(record_->at(4));
     if (addr.has_value()) {
     }
     record_->clear();
     record_->shrink_to_fit();
   }
-  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const { return schemas_; }
+  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const {
+    return schemas_;
+  }
   vector<any>* GetRecord() const { return record_; }
 
  protected:
@@ -301,7 +331,8 @@ TEST_F(DingoSerialListTypeTest, boolListSchema) {
   b1.SetIndex(0);
   b1.SetAllowNull(false);
   b1.SetIsKey(false);
-  std::shared_ptr<::vector<bool>> data1 = std::make_shared<std::vector<bool>>(std::vector<bool>{false, true});
+  std::shared_ptr<::vector<bool>> data1 =
+      std::make_shared<std::vector<bool>>(std::vector<bool>{false, true});
   Buf* bf1 = new Buf(2 + 4, this->le);
   b1.EncodeValue(bf1, data1);
   string* bs1 = bf1->GetBytes();
@@ -314,7 +345,8 @@ TEST_F(DingoSerialListTypeTest, boolListSchema) {
     const auto& vector2 = *data2.value();
     EXPECT_EQ(data1->size(), vector2.size());
     for (size_t j = 0; j < data1->size(); ++j) {
-      std::cout << "(*data1)[j]:" << (*data1)[j] << ",vector2[j]:" << vector2[j] << '\n';
+      std::cout << "(*data1)[j]:" << (*data1)[j] << ",vector2[j]:" << vector2[j]
+                << '\n';
       EXPECT_EQ((*data1)[j], vector2[j]);
     }
   } else {
@@ -704,7 +736,8 @@ TEST_F(DingoSerialListTypeTest, floatSchemaFakeLeBe) {
 
 TEST_F(DingoSerialListTypeTest, longSchemaLeBe) {
   uint64_t data = 8237583920453957801;
-  // bitset<64> key_data("1111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // key_data("1111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> key_data_0("11110010");
   bitset<8> key_data_1("01010001");
   bitset<8> key_data_2("11000110");
@@ -713,7 +746,8 @@ TEST_F(DingoSerialListTypeTest, longSchemaLeBe) {
   bitset<8> key_data_5("00100000");
   bitset<8> key_data_6("10111000");
   bitset<8> key_data_7("10101001");
-  // bitset<64> value_data("0111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // value_data("0111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> value_data_0("01110010");
   bitset<8> value_data_1("01010001");
   bitset<8> value_data_2("11000110");
@@ -795,7 +829,8 @@ TEST_F(DingoSerialListTypeTest, longSchemaLeBe) {
 
 TEST_F(DingoSerialListTypeTest, longSchemaFakeLeBe) {
   uint64_t data = bswap_64(8237583920453957801);
-  // bitset<64> key_data("1111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // key_data("1111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> key_data_0("11110010");
   bitset<8> key_data_1("01010001");
   bitset<8> key_data_2("11000110");
@@ -804,7 +839,8 @@ TEST_F(DingoSerialListTypeTest, longSchemaFakeLeBe) {
   bitset<8> key_data_5("00100000");
   bitset<8> key_data_6("10111000");
   bitset<8> key_data_7("10101001");
-  // bitset<64> value_data("0111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // value_data("0111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> value_data_0("01110010");
   bitset<8> value_data_1("01010001");
   bitset<8> value_data_2("11000110");
@@ -886,7 +922,8 @@ TEST_F(DingoSerialListTypeTest, longSchemaFakeLeBe) {
 
 TEST_F(DingoSerialListTypeTest, doubleSchemaPosLeBe) {
   double data = 345235.32656;
-  // bitset<64> key_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // key_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> key_data_0("11000001");
   bitset<8> key_data_1("00010101");
   bitset<8> key_data_2("00010010");
@@ -895,7 +932,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaPosLeBe) {
   bitset<8> key_data_5("01100101");
   bitset<8> key_data_6("10111110");
   bitset<8> key_data_7("10100001");
-  // bitset<64> value_data("0100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("0100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("01000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -982,7 +1020,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaPosFakeLeBe) {
   uint64_t data_bits = bswap_64(ori_data_bits);
   double data;
   memcpy(&data, &data_bits, 8);
-  // bitset<64> key_data("1100000100010101000100100100110101001110010101100000010000011001");
+  // bitset<64>
+  // key_data("1100000100010101000100100100110101001110010101100000010000011001");
   bitset<8> key_data_0("11000001");
   bitset<8> key_data_1("00010101");
   bitset<8> key_data_2("00010010");
@@ -991,7 +1030,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaPosFakeLeBe) {
   bitset<8> key_data_5("01010110");
   bitset<8> key_data_6("00000100");
   bitset<8> key_data_7("00011001");
-  // bitset<64> value_data("0100000100010101000100100100110101001110010101100000010000011001");
+  // bitset<64>
+  // value_data("0100000100010101000100100100110101001110010101100000010000011001");
   bitset<8> value_data_0("01000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -1074,7 +1114,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaPosFakeLeBe) {
 
 TEST_F(DingoSerialListTypeTest, doubleSchemaNegLeBe) {
   double data = -345235.32656;
-  // bitset<64> key_data("0011111011101010111011011011001010110001100110100100000101011110");
+  // bitset<64>
+  // key_data("0011111011101010111011011011001010110001100110100100000101011110");
   bitset<8> key_data_0("00111110");
   bitset<8> key_data_1("11101010");
   bitset<8> key_data_2("11101101");
@@ -1083,7 +1124,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaNegLeBe) {
   bitset<8> key_data_5("10011010");
   bitset<8> key_data_6("01000001");
   bitset<8> key_data_7("01011110");
-  // bitset<64> value_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("11000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -1170,7 +1212,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaNegFakeLeBe) {
   uint64_t data_bits = bswap_64(ori_data_bits);
   double data;
   memcpy(&data, &data_bits, 8);
-  // bitset<64> key_data("0011111011101010111011011011001010110001100110100100000101011110");
+  // bitset<64>
+  // key_data("0011111011101010111011011011001010110001100110100100000101011110");
   bitset<8> key_data_0("00111110");
   bitset<8> key_data_1("11101010");
   bitset<8> key_data_2("11101101");
@@ -1179,7 +1222,8 @@ TEST_F(DingoSerialListTypeTest, doubleSchemaNegFakeLeBe) {
   bitset<8> key_data_5("10011010");
   bitset<8> key_data_6("01000001");
   bitset<8> key_data_7("01011110");
-  // bitset<64> value_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("11000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -1604,7 +1648,7 @@ TEST_F(DingoSerialListTypeTest, bufLeBe) {
 TEST_F(DingoSerialListTypeTest, recordTest) {
   InitVector();
   auto schemas = GetSchemas();
-  RecordEncoder* re = new RecordEncoder(0, schemas, 0L, this->le);
+  RecordEncoderV1* re = new RecordEncoderV1(0, schemas, 0L, this->le);
   InitRecord();
 
   vector<any>* record1 = GetRecord();
@@ -1614,7 +1658,7 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
   (void)re->Encode('r', *record1, key, value);
   delete re;
 
-  RecordDecoder* rd = new RecordDecoder(0, schemas, 0L, this->le);
+  RecordDecoderV1* rd = new RecordDecoderV1(0, schemas, 0L, this->le);
   vector<any> record2;
   (void)rd->Decode(key, value, record2);
   std::cout << "record2 size:" << record2.size() << '\n';
@@ -1667,8 +1711,10 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kString: {
-        optional<shared_ptr<string>> r1 = any_cast<optional<shared_ptr<string>>>(record1->at(i));
-        optional<shared_ptr<string>> r2 = any_cast<optional<shared_ptr<string>>>(record2.at(i));
+        optional<shared_ptr<string>> r1 =
+            any_cast<optional<shared_ptr<string>>>(record1->at(i));
+        optional<shared_ptr<string>> r2 =
+            any_cast<optional<shared_ptr<string>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
           EXPECT_EQ(*r1.value(), *r2.value());
         } else if (r2.has_value()) {
@@ -1679,14 +1725,17 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kBoolList: {
-        optional<shared_ptr<std::vector<bool>>> r1 = any_cast<optional<shared_ptr<std::vector<bool>>>>(record1->at(i));
-        optional<shared_ptr<std::vector<bool>>> r2 = any_cast<optional<shared_ptr<std::vector<bool>>>>(record2.at(i));
+        optional<shared_ptr<std::vector<bool>>> r1 =
+            any_cast<optional<shared_ptr<std::vector<bool>>>>(record1->at(i));
+        optional<shared_ptr<std::vector<bool>>> r2 =
+            any_cast<optional<shared_ptr<std::vector<bool>>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
           const auto& vector1 = *r1.value();
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1698,15 +1747,18 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
       }
       case BaseSchema::kStringList: {
         optional<shared_ptr<std::vector<std::string>>> r1 =
-            any_cast<optional<shared_ptr<std::vector<std::string>>>>(record1->at(i));
+            any_cast<optional<shared_ptr<std::vector<std::string>>>>(
+                record1->at(i));
         optional<shared_ptr<std::vector<std::string>>> r2 =
-            any_cast<optional<shared_ptr<std::vector<std::string>>>>(record2.at(i));
+            any_cast<optional<shared_ptr<std::vector<std::string>>>>(
+                record2.at(i));
         if (r1.has_value() && r2.has_value()) {
           const auto& vector1 = *r1.value();
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1726,7 +1778,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1739,13 +1792,15 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
       case BaseSchema::kFloatList: {
         optional<shared_ptr<std::vector<float>>> r1 =
             any_cast<optional<shared_ptr<std::vector<float>>>>(record1->at(i));
-        optional<shared_ptr<std::vector<float>>> r2 = any_cast<optional<shared_ptr<std::vector<float>>>>(record2.at(i));
+        optional<shared_ptr<std::vector<float>>> r2 =
+            any_cast<optional<shared_ptr<std::vector<float>>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
           const auto& vector1 = *r1.value();
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1757,7 +1812,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
       }
       case BaseSchema::kIntegerList: {
         optional<shared_ptr<std::vector<int32_t>>> r1 =
-            any_cast<optional<shared_ptr<std::vector<int32_t>>>>(record1->at(i));
+            any_cast<optional<shared_ptr<std::vector<int32_t>>>>(
+                record1->at(i));
         optional<shared_ptr<std::vector<int32_t>>> r2 =
             any_cast<optional<shared_ptr<std::vector<int32_t>>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
@@ -1765,7 +1821,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1777,7 +1834,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
       }
       case BaseSchema::kLongList: {
         optional<shared_ptr<std::vector<int64_t>>> r1 =
-            any_cast<optional<shared_ptr<std::vector<int64_t>>>>(record1->at(i));
+            any_cast<optional<shared_ptr<std::vector<int64_t>>>>(
+                record1->at(i));
         optional<shared_ptr<std::vector<int64_t>>> r2 =
             any_cast<optional<shared_ptr<std::vector<int64_t>>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
@@ -1785,7 +1843,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
           const auto& vector2 = *r2.value();
           EXPECT_EQ(vector1.size(), vector2.size());
           for (size_t j = 0; j < vector1.size(); ++j) {
-            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+            // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+            // vector2[j];
             EXPECT_EQ(vector1[j], vector2[j]);
           }
         } else if (r2.has_value()) {
@@ -1812,8 +1871,10 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
     BaseSchema::Type type = bs->GetType();
     switch (type) {
       case BaseSchema::kBool: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<bool> r1 = any_cast<optional<bool>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<bool> r1 =
+              any_cast<optional<bool>>(record1->at(bs->GetIndex()));
           optional<bool> r2 = any_cast<optional<bool>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1826,8 +1887,10 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kInteger: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<int32_t> r1 = any_cast<optional<int32_t>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int32_t> r1 =
+              any_cast<optional<int32_t>>(record1->at(bs->GetIndex()));
           optional<int32_t> r2 = any_cast<optional<int32_t>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1840,8 +1903,10 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kLong: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<int64_t> r1 = any_cast<optional<int64_t>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int64_t> r1 =
+              any_cast<optional<int64_t>>(record1->at(bs->GetIndex()));
           optional<int64_t> r2 = any_cast<optional<int64_t>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1854,8 +1919,10 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kDouble: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<double> r1 = any_cast<optional<double>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<double> r1 =
+              any_cast<optional<double>>(record1->at(bs->GetIndex()));
           optional<double> r2 = any_cast<optional<double>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1868,9 +1935,13 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kString: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<shared_ptr<string>> r1 = any_cast<optional<shared_ptr<string>>>(record1->at(bs->GetIndex()));
-          optional<shared_ptr<string>> r2 = any_cast<optional<shared_ptr<string>>>(record3.at(i));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<shared_ptr<string>> r1 =
+              any_cast<optional<shared_ptr<string>>>(
+                  record1->at(bs->GetIndex()));
+          optional<shared_ptr<string>> r2 =
+              any_cast<optional<shared_ptr<string>>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(*r1.value(), *r2.value());
           } else if (r2.has_value()) {
@@ -1883,16 +1954,20 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kBoolList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<bool>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<bool>>>>(record1->at(bs->GetIndex()));
-          optional<shared_ptr<std::vector<bool>>> r2 = any_cast<optional<shared_ptr<std::vector<bool>>>>(record3.at(i));
+              any_cast<optional<shared_ptr<std::vector<bool>>>>(
+                  record1->at(bs->GetIndex()));
+          optional<shared_ptr<std::vector<bool>>> r2 =
+              any_cast<optional<shared_ptr<std::vector<bool>>>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             const auto& vector1 = *r1.value();
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {
@@ -1905,17 +1980,21 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kStringList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<std::string>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<std::string>>>>(record1->at(bs->GetIndex()));
+              any_cast<optional<shared_ptr<std::vector<std::string>>>>(
+                  record1->at(bs->GetIndex()));
           optional<shared_ptr<std::vector<std::string>>> r2 =
-              any_cast<optional<shared_ptr<std::vector<std::string>>>>(record3.at(i));
+              any_cast<optional<shared_ptr<std::vector<std::string>>>>(
+                  record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             const auto& vector1 = *r1.value();
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {
@@ -1928,17 +2007,21 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kDoubleList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<double>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<double>>>>(record1->at(bs->GetIndex()));
+              any_cast<optional<shared_ptr<std::vector<double>>>>(
+                  record1->at(bs->GetIndex()));
           optional<shared_ptr<std::vector<double>>> r2 =
-              any_cast<optional<shared_ptr<std::vector<double>>>>(record3.at(i));
+              any_cast<optional<shared_ptr<std::vector<double>>>>(
+                  record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             const auto& vector1 = *r1.value();
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {
@@ -1951,9 +2034,11 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kFloatList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<float>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<float>>>>(record1->at(bs->GetIndex()));
+              any_cast<optional<shared_ptr<std::vector<float>>>>(
+                  record1->at(bs->GetIndex()));
           optional<shared_ptr<std::vector<float>>> r2 =
               any_cast<optional<shared_ptr<std::vector<float>>>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
@@ -1961,7 +2046,8 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {
@@ -1974,17 +2060,21 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kIntegerList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<int32_t>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<int32_t>>>>(record1->at(bs->GetIndex()));
+              any_cast<optional<shared_ptr<std::vector<int32_t>>>>(
+                  record1->at(bs->GetIndex()));
           optional<shared_ptr<std::vector<int32_t>>> r2 =
-              any_cast<optional<shared_ptr<std::vector<int32_t>>>>(record3.at(i));
+              any_cast<optional<shared_ptr<std::vector<int32_t>>>>(
+                  record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             const auto& vector1 = *r1.value();
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {
@@ -1997,17 +2087,21 @@ TEST_F(DingoSerialListTypeTest, recordTest) {
         break;
       }
       case BaseSchema::kLongList: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
           optional<shared_ptr<std::vector<int64_t>>> r1 =
-              any_cast<optional<shared_ptr<std::vector<int64_t>>>>(record1->at(bs->GetIndex()));
+              any_cast<optional<shared_ptr<std::vector<int64_t>>>>(
+                  record1->at(bs->GetIndex()));
           optional<shared_ptr<std::vector<int64_t>>> r2 =
-              any_cast<optional<shared_ptr<std::vector<int64_t>>>>(record3.at(i));
+              any_cast<optional<shared_ptr<std::vector<int64_t>>>>(
+                  record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             const auto& vector1 = *r1.value();
             const auto& vector2 = *r2.value();
             EXPECT_EQ(vector1.size(), vector2.size());
             for (size_t j = 0; j < vector1.size(); ++j) {
-              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" << vector2[j];
+              // LOG(INFO) << "vector1[j]:" << vector1[j] << ",vector2[j]:" <<
+              // vector2[j];
               EXPECT_EQ(vector1[j], vector2[j]);
             }
           } else if (r2.has_value()) {

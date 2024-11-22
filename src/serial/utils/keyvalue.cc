@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "serial/keyvalue.h"
+#include "serial/utils/keyvalue.h"
 
 #include <memory>
 #include <string>

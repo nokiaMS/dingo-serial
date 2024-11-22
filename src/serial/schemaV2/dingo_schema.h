@@ -12,29 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_DINGO_SCHEMA_H_
-#define DINGO_SERIAL_DINGO_SCHEMA_H_
+#ifndef DINGO_SERIAL_DINGO_SCHEMA_V2_H_
+#define DINGO_SERIAL_DINGO_SCHEMA_V2_H_
 
-#include "serial/utils/buf.h"
-#include "serial/schema/base_schema.h"
+#include <memory>
+
+#include "base_schema.h"
+#include "serial/utilsV2/buf.h"
+#include "serial/schema/dingo_schema.h"
 
 namespace dingodb {
+namespace V2 {
 
 template <class T>
 class DingoSchema : public BaseSchema {
  public:
-  virtual void SetIndex(int index) = 0;
-  virtual void SetIsKey(bool key) = 0;
-  virtual void SetAllowNull(bool allow_null) = 0;
-  virtual void EncodeKey(Buf* buf, T data) = 0;
-  virtual void EncodeKeyPrefix(Buf* buf, T data) = 0;
-  virtual T DecodeKey(Buf* buf) = 0;
-  virtual void SkipKey(Buf* buf) = 0;
-  virtual void EncodeValue(Buf* buf, T data) = 0;
-  virtual T DecodeValue(Buf* buf) = 0;
-  virtual void SkipValue(Buf* buf) = 0;
+  BaseSchemaPtr Clone() override { return nullptr; }
+
+  int SkipKey(Buf& /*buf*/) override { return 0; }
+  int SkipValue(Buf& /*buf*/) override { return 0; }
+
+  int EncodeKey(const std::any& /*data*/, Buf& /*buf*/) override { return 0; }
+  int EncodeValue(const std::any& /*data*/, Buf& /*buf*/) override { return 0; }
+
+  std::any DecodeKey(Buf& buf /*NOLINT*/) override { return std::any(); }
+  std::any DecodeValue(Buf& buf /*NOLINT*/) override { return std::any(); }
 };
 
+}  // namespace V2
 }  // namespace dingodb
 
 #endif

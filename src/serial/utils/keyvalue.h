@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_DINGO_SCHEMA_H_
-#define DINGO_SERIAL_DINGO_SCHEMA_H_
+#ifndef DINGO_SERIAL_KEYVALUE_H_
+#define DINGO_SERIAL_KEYVALUE_H_
 
-#include "serial/utils/buf.h"
-#include "serial/schema/base_schema.h"
+#include <memory>
+#include <string>
 
 namespace dingodb {
 
-template <class T>
-class DingoSchema : public BaseSchema {
+class KeyValue {
+ private:
+  std::shared_ptr<std::string> key_;
+  std::shared_ptr<std::string> value_;
+
  public:
-  virtual void SetIndex(int index) = 0;
-  virtual void SetIsKey(bool key) = 0;
-  virtual void SetAllowNull(bool allow_null) = 0;
-  virtual void EncodeKey(Buf* buf, T data) = 0;
-  virtual void EncodeKeyPrefix(Buf* buf, T data) = 0;
-  virtual T DecodeKey(Buf* buf) = 0;
-  virtual void SkipKey(Buf* buf) = 0;
-  virtual void EncodeValue(Buf* buf, T data) = 0;
-  virtual T DecodeValue(Buf* buf) = 0;
-  virtual void SkipValue(Buf* buf) = 0;
+  KeyValue();
+  KeyValue(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
+  ~KeyValue() = default;
+  void Set(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
+  void SetKey(std::shared_ptr<std::string> key);
+  void SetValue(std::shared_ptr<std::string> value);
+  int GetVersion() const {
+   return this->key_->at(key_->size() -1);
+  }
+  std::shared_ptr<std::string> GetKey() const;
+  std::shared_ptr<std::string> GetValue() const;
 };
 
 }  // namespace dingodb

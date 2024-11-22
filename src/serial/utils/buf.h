@@ -53,6 +53,7 @@ class Buf {
   void ReverseWriteInt(int32_t i);
 
   uint8_t Peek();
+  uint8_t ReversePeek();
   int32_t PeekInt();
   int64_t PeekLong();
 

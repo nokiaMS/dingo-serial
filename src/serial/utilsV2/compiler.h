@@ -12,30 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_KEYVALUE_H_
-#define DINGO_SERIAL_KEYVALUE_H_
-
-#include <memory>
-#include <string>
+#ifndef DINGO_SERIAL_COMPILER_V2_H_
+#define DINGO_SERIAL_COMPILER_V2_H_
 
 namespace dingodb {
+namespace V2 {
 
-class KeyValue {
- private:
-  std::shared_ptr<std::string> key_;
-  std::shared_ptr<std::string> value_;
+#define COMPILER_GCC
 
- public:
-  KeyValue();
-  KeyValue(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
-  ~KeyValue() = default;
-  void Set(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
-  void SetKey(std::shared_ptr<std::string> key);
-  void SetValue(std::shared_ptr<std::string> value);
-  std::shared_ptr<std::string> GetKey() const;
-  std::shared_ptr<std::string> GetValue() const;
-};
+#if defined(COMPILER_GCC)
+#if defined(__cplusplus)
+#define DINGO_LIKELY(expr) (__builtin_expect((bool)(expr), true))
+#define DINGO_UNLIKELY(expr) (__builtin_expect((bool)(expr), false))
+#else
+#define DINGO_LIKELY(expr) (__builtin_expect(!!(expr), 1))
+#define DINGO_UNLIKELY(expr) (__builtin_expect(!!(expr), 0))
+#endif
+#else
+#define DINGO_LIKELY(expr) (expr)
+#define DINGO_UNLIKELY(expr) (expr)
+#endif
 
+}  // namespace V2
 }  // namespace dingodb
 
-#endif
+#endif  // DINGO_SERIAL_COMPILER_H_
