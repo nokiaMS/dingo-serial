@@ -99,6 +99,7 @@ void DingoSchema<std::optional<float>>::SetAllowNull(bool allow_null) { this->al
 bool DingoSchema<std::optional<float>>::AllowNull() { return allow_null_; }
 
 void DingoSchema<std::optional<float>>::SetIsLe(bool le) { this->le_ = le; }
+bool DingoSchema<std::optional<float>>::GetIsLe() { return this->le_; }
 
 void DingoSchema<std::optional<float>>::EncodeKey(Buf* buf, std::optional<float> data) {
   if (this->allow_null_) {

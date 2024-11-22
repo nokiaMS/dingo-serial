@@ -14,9 +14,9 @@
 
 #include <byteswap.h>
 #include <gtest/gtest.h>
-#include <serial/record_decoder.h>
-#include <serial/record_encoder.h>
-#include <serial/utils.h>
+#include <serial/record/record_decoder.h>
+#include <serial/record/record_encoder.h>
+#include <serial/utils/utils.h>
 
 #include <algorithm>
 #include <bitset>
@@ -24,7 +24,8 @@
 #include <optional>
 #include <string>
 
-// #include "serial/keyvalue_codec.h"
+#include "serial/record_decoder.h"
+#include "serial/record_encoder.h"
 #include "serial/schema/base_schema.h"
 
 using namespace dingodb;
@@ -119,7 +120,9 @@ class DingoSerialTest : public testing::Test {
     optional<int64_t> score = 214748364700L;
     std::shared_ptr<std::string> addr = std::make_shared<std::string>(
         "test address test 中文 表情😊🏷️👌 test "
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测试"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试"
+        "测"
+        "试"
         "测"
         "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫");
     optional<bool> exist = false;
@@ -142,19 +145,24 @@ class DingoSerialTest : public testing::Test {
     record_->at(10) = salary;
   }
   void DeleteRecords() const {
-    optional<shared_ptr<string>> name = any_cast<optional<shared_ptr<string>>>(record_->at(1));
+    optional<shared_ptr<string>> name =
+        any_cast<optional<shared_ptr<string>>>(record_->at(1));
     if (name.has_value()) {
     }
-    optional<shared_ptr<string>> gender = any_cast<optional<shared_ptr<string>>>(record_->at(2));
+    optional<shared_ptr<string>> gender =
+        any_cast<optional<shared_ptr<string>>>(record_->at(2));
     if (gender.has_value()) {
     }
-    optional<shared_ptr<string>> addr = any_cast<optional<shared_ptr<string>>>(record_->at(4));
+    optional<shared_ptr<string>> addr =
+        any_cast<optional<shared_ptr<string>>>(record_->at(4));
     if (addr.has_value()) {
     }
     record_->clear();
     record_->shrink_to_fit();
   }
-  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const { return schemas_; }
+  std::shared_ptr<vector<std::shared_ptr<BaseSchema>>> GetSchemas() const {
+    return schemas_;
+  }
   vector<any>* GetRecord() const { return record_; }
 
  protected:
@@ -566,7 +574,8 @@ TEST_F(DingoSerialTest, floatSchemaFakeLeBe) {
 
 TEST_F(DingoSerialTest, longSchemaLeBe) {
   uint64_t data = 8237583920453957801;
-  // bitset<64> key_data("1111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // key_data("1111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> key_data_0("11110010");
   bitset<8> key_data_1("01010001");
   bitset<8> key_data_2("11000110");
@@ -575,7 +584,8 @@ TEST_F(DingoSerialTest, longSchemaLeBe) {
   bitset<8> key_data_5("00100000");
   bitset<8> key_data_6("10111000");
   bitset<8> key_data_7("10101001");
-  // bitset<64> value_data("0111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // value_data("0111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> value_data_0("01110010");
   bitset<8> value_data_1("01010001");
   bitset<8> value_data_2("11000110");
@@ -657,7 +667,8 @@ TEST_F(DingoSerialTest, longSchemaLeBe) {
 
 TEST_F(DingoSerialTest, longSchemaFakeLeBe) {
   uint64_t data = bswap_64(8237583920453957801);
-  // bitset<64> key_data("1111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // key_data("1111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> key_data_0("11110010");
   bitset<8> key_data_1("01010001");
   bitset<8> key_data_2("11000110");
@@ -666,7 +677,8 @@ TEST_F(DingoSerialTest, longSchemaFakeLeBe) {
   bitset<8> key_data_5("00100000");
   bitset<8> key_data_6("10111000");
   bitset<8> key_data_7("10101001");
-  // bitset<64> value_data("0111001001010001110001101110111001011010001000001011100010101001");
+  // bitset<64>
+  // value_data("0111001001010001110001101110111001011010001000001011100010101001");
   bitset<8> value_data_0("01110010");
   bitset<8> value_data_1("01010001");
   bitset<8> value_data_2("11000110");
@@ -748,7 +760,8 @@ TEST_F(DingoSerialTest, longSchemaFakeLeBe) {
 
 TEST_F(DingoSerialTest, doubleSchemaPosLeBe) {
   double data = 345235.32656;
-  // bitset<64> key_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // key_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> key_data_0("11000001");
   bitset<8> key_data_1("00010101");
   bitset<8> key_data_2("00010010");
@@ -757,7 +770,8 @@ TEST_F(DingoSerialTest, doubleSchemaPosLeBe) {
   bitset<8> key_data_5("01100101");
   bitset<8> key_data_6("10111110");
   bitset<8> key_data_7("10100001");
-  // bitset<64> value_data("0100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("0100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("01000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -844,7 +858,8 @@ TEST_F(DingoSerialTest, doubleSchemaPosFakeLeBe) {
   uint64_t data_bits = bswap_64(ori_data_bits);
   double data;
   memcpy(&data, &data_bits, 8);
-  // bitset<64> key_data("1100000100010101000100100100110101001110010101100000010000011001");
+  // bitset<64>
+  // key_data("1100000100010101000100100100110101001110010101100000010000011001");
   bitset<8> key_data_0("11000001");
   bitset<8> key_data_1("00010101");
   bitset<8> key_data_2("00010010");
@@ -853,7 +868,8 @@ TEST_F(DingoSerialTest, doubleSchemaPosFakeLeBe) {
   bitset<8> key_data_5("01010110");
   bitset<8> key_data_6("00000100");
   bitset<8> key_data_7("00011001");
-  // bitset<64> value_data("0100000100010101000100100100110101001110010101100000010000011001");
+  // bitset<64>
+  // value_data("0100000100010101000100100100110101001110010101100000010000011001");
   bitset<8> value_data_0("01000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -936,7 +952,8 @@ TEST_F(DingoSerialTest, doubleSchemaPosFakeLeBe) {
 
 TEST_F(DingoSerialTest, doubleSchemaNegLeBe) {
   double data = -345235.32656;
-  // bitset<64> key_data("0011111011101010111011011011001010110001100110100100000101011110");
+  // bitset<64>
+  // key_data("0011111011101010111011011011001010110001100110100100000101011110");
   bitset<8> key_data_0("00111110");
   bitset<8> key_data_1("11101010");
   bitset<8> key_data_2("11101101");
@@ -945,7 +962,8 @@ TEST_F(DingoSerialTest, doubleSchemaNegLeBe) {
   bitset<8> key_data_5("10011010");
   bitset<8> key_data_6("01000001");
   bitset<8> key_data_7("01011110");
-  // bitset<64> value_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("11000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -1032,7 +1050,8 @@ TEST_F(DingoSerialTest, doubleSchemaNegFakeLeBe) {
   uint64_t data_bits = bswap_64(ori_data_bits);
   double data;
   memcpy(&data, &data_bits, 8);
-  // bitset<64> key_data("0011111011101010111011011011001010110001100110100100000101011110");
+  // bitset<64>
+  // key_data("0011111011101010111011011011001010110001100110100100000101011110");
   bitset<8> key_data_0("00111110");
   bitset<8> key_data_1("11101010");
   bitset<8> key_data_2("11101101");
@@ -1041,7 +1060,8 @@ TEST_F(DingoSerialTest, doubleSchemaNegFakeLeBe) {
   bitset<8> key_data_5("10011010");
   bitset<8> key_data_6("01000001");
   bitset<8> key_data_7("01011110");
-  // bitset<64> value_data("1100000100010101000100100100110101001110011001011011111010100001");
+  // bitset<64>
+  // value_data("1100000100010101000100100100110101001110011001011011111010100001");
   bitset<8> value_data_0("11000001");
   bitset<8> value_data_1("00010101");
   bitset<8> value_data_2("00010010");
@@ -1466,6 +1486,195 @@ TEST_F(DingoSerialTest, bufLeBe) {
 TEST_F(DingoSerialTest, recordTest) {
   InitVector();
   auto schemas = GetSchemas();
+  RecordEncoderV1* re = new RecordEncoderV1(0, schemas, 0L, this->le);
+  InitRecord();
+
+  vector<any>* record1 = GetRecord();
+  std::string key, value;
+  (void)re->Encode('r', *record1, key, value);
+  delete re;
+
+  RecordDecoderV1* rd = new RecordDecoderV1(0, schemas, 0L, this->le);
+  vector<any> record2;
+  (void)rd->Decode(key, value, record2);
+  int i = 0;
+  for (const auto& bs : *schemas) {
+    BaseSchema::Type type = bs->GetType();
+    switch (type) {
+      case BaseSchema::kBool: {
+        optional<bool> r1 = any_cast<optional<bool>>(record1->at(i));
+        optional<bool> r2 = any_cast<optional<bool>>(record2.at(i));
+        if (r1.has_value() && r2.has_value()) {
+          EXPECT_EQ(r1.value(), r2.value());
+        } else {
+          EXPECT_FALSE(r1.has_value());
+          EXPECT_FALSE(r2.has_value());
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        optional<int32_t> r1 = any_cast<optional<int32_t>>(record1->at(i));
+        optional<int32_t> r2 = any_cast<optional<int32_t>>(record2.at(i));
+        if (r1.has_value() && r2.has_value()) {
+          EXPECT_EQ(r1.value(), r2.value());
+        } else {
+          EXPECT_FALSE(r1.has_value());
+          EXPECT_FALSE(r2.has_value());
+        }
+        break;
+      }
+      case BaseSchema::kLong: {
+        optional<int64_t> r1 = any_cast<optional<int64_t>>(record1->at(i));
+        optional<int64_t> r2 = any_cast<optional<int64_t>>(record2.at(i));
+        if (r1.has_value() && r2.has_value()) {
+          EXPECT_EQ(r1.value(), r2.value());
+        } else {
+          EXPECT_FALSE(r1.has_value());
+          EXPECT_FALSE(r2.has_value());
+        }
+        break;
+      }
+      case BaseSchema::kDouble: {
+        optional<double> r1 = any_cast<optional<double>>(record1->at(i));
+        optional<double> r2 = any_cast<optional<double>>(record2.at(i));
+        if (r1.has_value() && r2.has_value()) {
+          EXPECT_EQ(r1.value(), r2.value());
+        } else {
+          EXPECT_FALSE(r1.has_value());
+          EXPECT_FALSE(r2.has_value());
+        }
+        break;
+      }
+      case BaseSchema::kString: {
+        optional<shared_ptr<string>> r1 =
+            any_cast<optional<shared_ptr<string>>>(record1->at(i));
+        optional<shared_ptr<string>> r2 =
+            any_cast<optional<shared_ptr<string>>>(record2.at(i));
+        if (r1.has_value() && r2.has_value()) {
+          EXPECT_EQ(*r1.value(), *r2.value());
+        } else if (r2.has_value()) {
+          EXPECT_TRUE(0);
+        } else {
+          EXPECT_FALSE(r1.has_value());
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    i++;
+  }
+  // delete record2;
+
+  vector<int> index{0, 1, 3, 5};
+  vector<int> index_temp{0, 1, 3, 5};
+  vector<any> record3;
+  (void)rd->Decode(key, value, index, record3);
+  i = 0;
+  for (const auto& bs : *schemas) {
+    BaseSchema::Type type = bs->GetType();
+    switch (type) {
+      case BaseSchema::kBool: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<bool> r1 =
+              any_cast<optional<bool>>(record1->at(bs->GetIndex()));
+          optional<bool> r2 = any_cast<optional<bool>>(record3.at(i));
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(r1.value(), r2.value());
+          } else {
+            EXPECT_FALSE(r1.has_value());
+            EXPECT_FALSE(r2.has_value());
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int32_t> r1 =
+              any_cast<optional<int32_t>>(record1->at(bs->GetIndex()));
+          optional<int32_t> r2 = any_cast<optional<int32_t>>(record3.at(i));
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(r1.value(), r2.value());
+          } else {
+            EXPECT_FALSE(r1.has_value());
+            EXPECT_FALSE(r2.has_value());
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kLong: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int64_t> r1 =
+              any_cast<optional<int64_t>>(record1->at(bs->GetIndex()));
+          optional<int64_t> r2 = any_cast<optional<int64_t>>(record3.at(i));
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(r1.value(), r2.value());
+          } else {
+            EXPECT_FALSE(r1.has_value());
+            EXPECT_FALSE(r2.has_value());
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDouble: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<double> r1 =
+              any_cast<optional<double>>(record1->at(bs->GetIndex()));
+          optional<double> r2 = any_cast<optional<double>>(record3.at(i));
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(r1.value(), r2.value());
+          } else {
+            EXPECT_FALSE(r1.has_value());
+            EXPECT_FALSE(r2.has_value());
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kString: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<shared_ptr<string>> r1 =
+              any_cast<optional<shared_ptr<string>>>(
+                  record1->at(bs->GetIndex()));
+          optional<shared_ptr<string>> r2 =
+              any_cast<optional<shared_ptr<string>>>(record3.at(i));
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(*r1.value(), *r2.value());
+          } else if (r2.has_value()) {
+            EXPECT_TRUE(0);
+          } else {
+            EXPECT_FALSE(r1.has_value());
+          }
+          i++;
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  DeleteSchemas();
+  DeleteRecords();
+  // delete record3;
+  // delete kv;
+  delete rd;
+}
+
+/*
+TEST_F(DingoSerialTest, wrapperTest) {
+  InitVector();
+  auto schemas = GetSchemas();
   RecordEncoder* re = new RecordEncoder(0, schemas, 0L, this->le);
   InitRecord();
 
@@ -1526,8 +1735,10 @@ TEST_F(DingoSerialTest, recordTest) {
         break;
       }
       case BaseSchema::kString: {
-        optional<shared_ptr<string>> r1 = any_cast<optional<shared_ptr<string>>>(record1->at(i));
-        optional<shared_ptr<string>> r2 = any_cast<optional<shared_ptr<string>>>(record2.at(i));
+        optional<shared_ptr<string>> r1 =
+            any_cast<optional<shared_ptr<string>>>(record1->at(i));
+        optional<shared_ptr<string>> r2 =
+            any_cast<optional<shared_ptr<string>>>(record2.at(i));
         if (r1.has_value() && r2.has_value()) {
           EXPECT_EQ(*r1.value(), *r2.value());
         } else if (r2.has_value()) {
@@ -1554,8 +1765,10 @@ TEST_F(DingoSerialTest, recordTest) {
     BaseSchema::Type type = bs->GetType();
     switch (type) {
       case BaseSchema::kBool: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<bool> r1 = any_cast<optional<bool>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<bool> r1 =
+              any_cast<optional<bool>>(record1->at(bs->GetIndex()));
           optional<bool> r2 = any_cast<optional<bool>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1568,8 +1781,10 @@ TEST_F(DingoSerialTest, recordTest) {
         break;
       }
       case BaseSchema::kInteger: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<int32_t> r1 = any_cast<optional<int32_t>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int32_t> r1 =
+              any_cast<optional<int32_t>>(record1->at(bs->GetIndex()));
           optional<int32_t> r2 = any_cast<optional<int32_t>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1582,8 +1797,10 @@ TEST_F(DingoSerialTest, recordTest) {
         break;
       }
       case BaseSchema::kLong: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<int64_t> r1 = any_cast<optional<int64_t>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<int64_t> r1 =
+              any_cast<optional<int64_t>>(record1->at(bs->GetIndex()));
           optional<int64_t> r2 = any_cast<optional<int64_t>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1596,8 +1813,10 @@ TEST_F(DingoSerialTest, recordTest) {
         break;
       }
       case BaseSchema::kDouble: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<double> r1 = any_cast<optional<double>>(record1->at(bs->GetIndex()));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<double> r1 =
+              any_cast<optional<double>>(record1->at(bs->GetIndex()));
           optional<double> r2 = any_cast<optional<double>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(r1.value(), r2.value());
@@ -1610,9 +1829,13 @@ TEST_F(DingoSerialTest, recordTest) {
         break;
       }
       case BaseSchema::kString: {
-        if (binary_search(index_temp.begin(), index_temp.end(), bs->GetIndex())) {
-          optional<shared_ptr<string>> r1 = any_cast<optional<shared_ptr<string>>>(record1->at(bs->GetIndex()));
-          optional<shared_ptr<string>> r2 = any_cast<optional<shared_ptr<string>>>(record3.at(i));
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          optional<shared_ptr<string>> r1 =
+              any_cast<optional<shared_ptr<string>>>(
+                  record1->at(bs->GetIndex()));
+          optional<shared_ptr<string>> r2 =
+              any_cast<optional<shared_ptr<string>>>(record3.at(i));
           if (r1.has_value() && r2.has_value()) {
             EXPECT_EQ(*r1.value(), *r2.value());
           } else if (r2.has_value()) {
@@ -1636,3 +1859,4 @@ TEST_F(DingoSerialTest, recordTest) {
   // delete kv;
   delete rd;
 }
+*/

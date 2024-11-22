@@ -26,7 +26,8 @@ namespace dingodb {
 
 template <>
 
-class DingoSchema<std::optional<std::shared_ptr<std::string>>> : public BaseSchema {
+class DingoSchema<std::optional<std::shared_ptr<std::string>>>
+    : public BaseSchema {
  private:
   int index_;
   bool key_, allow_null_;
@@ -47,7 +48,8 @@ class DingoSchema<std::optional<std::shared_ptr<std::string>>> : public BaseSche
   void SetAllowNull(bool allow_null);
 
   void EncodeKey(Buf* buf, std::optional<std::shared_ptr<std::string>> data);
-  void EncodeKeyPrefix(Buf* buf, std::optional<std::shared_ptr<std::string>> data);
+  void EncodeKeyPrefix(Buf* buf,
+                       std::optional<std::shared_ptr<std::string>> data);
   void EncodeValue(Buf* buf, std::optional<std::shared_ptr<std::string>> data);
 
   void SkipKey(Buf* buf) const;
