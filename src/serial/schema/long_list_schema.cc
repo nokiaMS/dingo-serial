@@ -16,11 +16,18 @@
 
 namespace dingodb {
 
-int DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetDataLength() { return 8; }
+int DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetDataLength() {
+  return 8;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetWithNullTagLength() { return 9; }
+int DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    GetWithNullTagLength() {
+  return 9;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::LeInternalEncodeValue(Buf* buf, int64_t data) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    LeInternalEncodeValue(Buf* buf, int64_t data) {
   uint64_t* l = (uint64_t*)&data;
   buf->Write(*l >> 56);
   buf->Write(*l >> 48);
@@ -32,7 +39,8 @@ void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::LeIntern
   buf->Write(*l);
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::BeInternalEncodeValue(Buf* buf, int64_t data) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    BeInternalEncodeValue(Buf* buf, int64_t data) {
   uint64_t* l = (uint64_t*)&data;
   buf->Write(*l);
   buf->Write(*l >> 8);
@@ -44,52 +52,81 @@ void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::BeIntern
   buf->Write(*l >> 56);
 }
 
-BaseSchema::Type DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetType() { return kLongList; }
+BaseSchema::Type
+DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetType() {
+  return kLongList;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIndex(int index) { this->index_ = index; }
+void DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIndex(int index) {
+  this->index_ = index;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetIndex() { return this->index_; }
+int DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetIndex() {
+  return this->index_;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIsKey(bool key) { this->key_ = key; }
+void DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIsKey(bool key) {
+  this->key_ = key;
+}
 
-bool DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::IsKey() { return this->key_; }
+bool DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::IsKey() {
+  return this->key_;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetLength() {
+int DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::GetLength() {
   if (this->allow_null_) {
     return GetWithNullTagLength();
   }
   return GetDataLength();
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetAllowNull(bool allow_null) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    SetAllowNull(bool allow_null) {
   this->allow_null_ = allow_null;
 }
 
-bool DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::AllowNull() { return this->allow_null_; }
+bool DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::AllowNull() {
+  return this->allow_null_;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIsLe(bool le) { this->le_ = le; }
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SetIsLe(
+    bool le) {
+  this->le_ = le;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::EncodeKey(
-    Buf* /*buf*/, std::optional<std::shared_ptr<std::vector<int64_t>>> /*data*/) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    EncodeKey(Buf* /*buf*/,
+              std::optional<std::shared_ptr<std::vector<int64_t>>> /*data*/) {
   throw std::runtime_error("Unsupported EncodeKey List Type");
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::EncodeKeyPrefix(
-    Buf* /*buf*/, std::optional<std::shared_ptr<std::vector<int64_t>>> /*data*/) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    EncodeKeyPrefix(
+        Buf* /*buf*/,
+        std::optional<std::shared_ptr<std::vector<int64_t>>> /*data*/) {
   throw std::runtime_error("Unsupported EncodeKey List Type");
 }
 
 std::optional<std::shared_ptr<std::vector<int64_t>>>
-DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::DecodeKey(Buf* /*buf*/) {
+DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::DecodeKey(
+    Buf* /*buf*/) {
   throw std::runtime_error("Unsupported EncodeKey List Type");
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SkipKey(Buf* /*buf*/) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SkipKey(
+    Buf* /*buf*/) {
   throw std::runtime_error("Unsupported EncodeKey List Type");
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::EncodeValue(
-    Buf* buf, std::optional<std::shared_ptr<std::vector<int64_t>>> data) {
+void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    EncodeValue(Buf* buf,
+                std::optional<std::shared_ptr<std::vector<int64_t>>> data) {
   if (this->allow_null_) {
     if (data.has_value()) {
       int data_size = data.value()->size();
@@ -125,7 +162,8 @@ void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::EncodeVa
   }
 }
 
-uint64_t DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::InternalDecodeData(Buf* buf) const {
+uint64_t DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::
+    InternalDecodeData(Buf* buf) const {
   uint64_t l = buf->Read() & 0xFF;
   if (this->le_) {
     for (int i = 0; i < 7; i++) {
@@ -141,14 +179,16 @@ uint64_t DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::Inte
 }
 
 std::optional<std::shared_ptr<std::vector<int64_t>>>
-DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::DecodeValue(Buf* buf) {
+DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::DecodeValue(
+    Buf* buf) {
   if (this->allow_null_) {
     if (buf->Read() == this->k_null) {
       return std::nullopt;
     }
   }
   int length = buf->ReadInt();
-  std::shared_ptr<std::vector<int64_t>> data = std::make_shared<std::vector<int64_t>>();
+  std::shared_ptr<std::vector<int64_t>> data =
+      std::make_shared<std::vector<int64_t>>();
   data->reserve(length);
   for (int i = 0; i < length; i++) {
     data->emplace_back(InternalDecodeData(buf));
@@ -156,7 +196,8 @@ DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::DecodeValue(B
   return data;
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>::SkipValue(Buf* buf) {
+void DingoSchema<
+    std::optional<std::shared_ptr<std::vector<int64_t>>>>::SkipValue(Buf* buf) {
   if (this->allow_null_) {
     if (buf->Read() == this->k_null) {
       return;

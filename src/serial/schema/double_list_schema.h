@@ -25,7 +25,8 @@ namespace dingodb {
 
 template <>
 
-class DingoSchema<std::optional<std::shared_ptr<std::vector<double>>>> : public BaseSchema {
+class DingoSchema<std::optional<std::shared_ptr<std::vector<double>>>>
+    : public BaseSchema {
  private:
   int index_;
   bool key_, allow_null_;
@@ -46,12 +47,16 @@ class DingoSchema<std::optional<std::shared_ptr<std::vector<double>>>> : public 
   void SetIsKey(bool key);
   void SetAllowNull(bool allow_null);
   void SetIsLe(bool le);
-  static void EncodeKey(Buf* buf, std::optional<std::shared_ptr<std::vector<double>>> data);
-  static void EncodeKeyPrefix(Buf* buf, std::optional<std::shared_ptr<std::vector<double>>> data);
-  static std::optional<std::shared_ptr<std::vector<double>>> DecodeKey(Buf* buf);
+  static void EncodeKey(
+      Buf* buf, std::optional<std::shared_ptr<std::vector<double>>> data);
+  static void EncodeKeyPrefix(
+      Buf* buf, std::optional<std::shared_ptr<std::vector<double>>> data);
+  static std::optional<std::shared_ptr<std::vector<double>>> DecodeKey(
+      Buf* buf);
   static void SkipKey(Buf* buf);
   double InternalDecodeData(Buf* buf) const;
-  void EncodeValue(Buf* buf, std::optional<std::shared_ptr<std::vector<double>>> data);
+  void EncodeValue(Buf* buf,
+                   std::optional<std::shared_ptr<std::vector<double>>> data);
   std::optional<std::shared_ptr<std::vector<double>>> DecodeValue(Buf* buf);
   void SkipValue(Buf* buf);
 };

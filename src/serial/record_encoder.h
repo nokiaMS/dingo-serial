@@ -12,67 +12,125 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_RECORD_ENCODER_H_
-#define DINGO_SERIAL_RECORD_ENCODER_H_
+#ifndef DINGO_RECORD_ENCODER_WRAPPER_H_
+#define DINGO_RECORD_ENCODER_WRAPPER_H_
 
+#include <any>
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "any"
-#include "functional"         // IWYU pragma: keep
-#include "optional"           // IWYU pragma: keep
-#include "serial/keyvalue.h"  // IWYU pragma: keep
-#include "serial/schema/boolean_list_schema.h"
-#include "serial/schema/boolean_schema.h"  // IWYU pragma: keep
-#include "serial/schema/double_list_schema.h"
-#include "serial/schema/double_schema.h"  // IWYU pragma: keep
-#include "serial/schema/float_list_schema.h"
-#include "serial/schema/float_schema.h"  // IWYU pragma: keep
-#include "serial/schema/integer_list_schema.h"
-#include "serial/schema/integer_schema.h"  // IWYU pragma: keep
-#include "serial/schema/long_list_schema.h"
-#include "serial/schema/long_schema.h"  // IWYU pragma: keep
-#include "serial/schema/string_list_schema.h"
-#include "serial/schema/string_schema.h"  // IWYU pragma: keep
-#include "serial/utils.h"                 // IWYU pragma: keep
+#include "serial/record/V2/record_encoder.h"
+#include "serial/record/record_encoder.h"
+#include "serial/schema/base_schema.h"
+#include "serial/utils/V2/compiler.h"
+#include "serial/utils/V2/schema_converter.h"
 
 namespace dingodb {
 
 class RecordEncoder {
  private:
-  void EncodePrefix(Buf& buf, char prefix) const;
-  void EncodeReverseTag(Buf& buf) const;
-  void EncodeSchemaVersion(Buf& buf) const;
+  int codec_version_;
+  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+      schemas_v1_;
+  std::vector<serialV2::BaseSchemaPtr> schemas_v2_;
 
-  uint8_t codec_version_ = 1;
-  int schema_version_;
-  std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas_;
-  long common_id_;
-  int key_buf_size_;
-  int value_buf_size_;
-  bool le_;
+  dingodb::RecordEncoderV1* re_v1_;
+  dingodb::serialV2::RecordEncoderV2* re_v2_;
 
  public:
-  RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordEncoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
-                bool le);
+  // constructors for version 1.
+  RecordEncoder(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id);
+  RecordEncoder(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id, bool le);
 
-  void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  // constructors for version 2.
+  RecordEncoder(int schema_version,
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id);
+  RecordEncoder(int schema_version,
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id, bool le);
 
-  int Encode(char prefix, const std::vector<std::any>& record, std::string& key, std::string& value);
+  ~RecordEncoder() {
+    delete re_v1_;
+    delete re_v2_;
+  }
 
-  int EncodeKey(char prefix, const std::vector<std::any>& record, std::string& output);
+  void SetCodecVersion(int v) { this->codec_version_ = v; }
 
-  int EncodeValue(const std::vector<std::any>& record, std::string& output);
+  int GetCodecVersion() { return this->codec_version_; }
 
-  int EncodeKeyPrefix(char prefix, const std::vector<std::any>& record, int column_count, std::string& output);
-  int EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys, std::string& output);
+  void Init(int schema_version,
+            std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+            long common_id);
 
-  int EncodeMaxKeyPrefix(char prefix, std::string& output) const;
+  int Encode(char prefix, const std::vector<std::any>& record, std::string& key,
+             std::string& value) {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->Encode(prefix, record, key, value);
+    } else {
+      return re_v2_->Encode(prefix, record, key, value);
+    }
+  }
 
-  int EncodeMinKeyPrefix(char prefix, std::string& output) const;
+  int EncodeKey(char prefix, const std::vector<std::any>& record,
+                std::string& output) {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeKey(prefix, record, output);
+    } else {
+      return re_v2_->EncodeKey(prefix, record, output);
+    }
+  }
+
+  int EncodeValue(const std::vector<std::any>& record, std::string& output) {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeValue(record, output);
+    } else {
+      return re_v2_->EncodeValue(record, output);
+    }
+  }
+
+  int EncodeKeyPrefix(char prefix, const std::vector<std::any>& record,
+                      int column_count, std::string& output) {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeKeyPrefix(prefix, record, column_count, output);
+    } else {
+      throw std::runtime_error("Unsupport function EncodeKeyPrefix.");
+    }
+  }
+
+  int EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys,
+                      std::string& output) {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeKeyPrefix(prefix, keys, output);
+    } else {
+      throw std::runtime_error("Unsupport function EncodeKeyPrefix.");
+    }
+  }
+
+  int EncodeMaxKeyPrefix(char prefix, std::string& output) const {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeMaxKeyPrefix(prefix, output);
+    } else {
+      return re_v2_->EncodeMaxKeyPrefix(prefix, output);
+    }
+  }
+
+  int EncodeMinKeyPrefix(char prefix, std::string& output) const {
+    if (DINGO_UNLIKELY(codec_version_ == serialV2::CODEC_VERSION_V1)) {
+      return re_v1_->EncodeMaxKeyPrefix(prefix, output);
+    } else {
+      return re_v2_->EncodeMaxKeyPrefix(prefix, output);
+    }
+  }
 };
 
 }  // namespace dingodb
 
-#endif
+#endif  // DINGO_RECORD_ENCODER_WRAPPER_H_

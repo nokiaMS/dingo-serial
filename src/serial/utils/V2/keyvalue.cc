@@ -12,26 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "serial/keyvalue.h"
+#include "keyvalue.h"
 
 #include <memory>
 #include <string>
 
 namespace dingodb {
+namespace serialV2 {
 
-KeyValue::KeyValue() : key_(std::make_shared<std::string>()), value_(std::make_shared<std::string>()) {}
+KeyValue::KeyValue(const std::string& key, const std::string& value)
+    : key_(key), value_(value) {}
 
-KeyValue::KeyValue(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value) : key_(key), value_(value) {}
-
-void KeyValue::Set(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value) {
+void KeyValue::Set(const std::string& key, const std::string& value) {
   this->key_ = key;
   this->value_ = value;
 }
 
-void KeyValue::SetKey(std::shared_ptr<std::string> key) { this->key_ = key; }
-void KeyValue::SetValue(std::shared_ptr<std::string> value) { this->value_ = value; }
+void KeyValue::SetKey(const std::string& key) { this->key_ = key; }
+void KeyValue::SetValue(const std::string& value) { this->value_ = value; }
 
-std::shared_ptr<std::string> KeyValue::GetKey() const { return key_; }
-std::shared_ptr<std::string> KeyValue::GetValue() const { return value_; }
+const std::string& KeyValue::GetKey() const { return key_; }
+const std::string& KeyValue::GetValue() const { return value_; }
 
+}  // namespace serialV2
 }  // namespace dingodb

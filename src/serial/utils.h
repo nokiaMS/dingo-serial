@@ -12,39 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_UTILS_H_
-#define DINGO_SERIAL_UTILS_H_
+#ifndef DINGO_UTILS_WRAPPER_H_
+#define DINGO_UTILS_WRAPPER_H_
 
-#include <any>
-#include <iostream>
-#include <memory>
-#include <vector>
+#include "utils/utils.h"
 
-#include "serial/schema/base_schema.h"
-#include "serial/schema/boolean_schema.h"
-#include "serial/schema/double_list_schema.h"
-#include "serial/schema/double_schema.h"
-#include "serial/schema/float_list_schema.h"
-#include "serial/schema/integer_list_schema.h"
-#include "serial/schema/integer_schema.h"
-#include "serial/schema/long_list_schema.h"
-#include "serial/schema/long_schema.h"
-#include "serial/schema/string_list_schema.h"
-#include "serial/schema/string_schema.h"
-
-namespace dingodb {
-
-void SortSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
-void FormatSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, bool le);
-int* GetApproPerRecordSize(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
-
-bool VectorFindAndRemove(std::vector<int>* v, int t);
-// bool VectorFind(const std::vector<int>& v, int t);
-// bool VectorFind(const std::vector<int>& v, int t, int n);
-inline bool VectorFind(const std::vector<int>& v, int t, int n) { return v[n] == t; }
-
-bool IsLE();
-
-}  // namespace dingodb
-
-#endif
+#endif  // DINGO_UTILS_WRAPPER_H_

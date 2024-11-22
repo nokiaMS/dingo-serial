@@ -12,30 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_KEYVALUE_H_
-#define DINGO_SERIAL_KEYVALUE_H_
+#ifndef DINGO_SERIAL_KEYVALUE_V2_H_
+#define DINGO_SERIAL_KEYVALUE_V2_H_
 
-#include <memory>
 #include <string>
 
 namespace dingodb {
+namespace serialV2 {
 
 class KeyValue {
- private:
-  std::shared_ptr<std::string> key_;
-  std::shared_ptr<std::string> value_;
-
  public:
-  KeyValue();
-  KeyValue(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
+  KeyValue() = default;
+  KeyValue(const std::string& key, const std::string& value);
   ~KeyValue() = default;
-  void Set(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
-  void SetKey(std::shared_ptr<std::string> key);
-  void SetValue(std::shared_ptr<std::string> value);
-  std::shared_ptr<std::string> GetKey() const;
-  std::shared_ptr<std::string> GetValue() const;
+
+  void Set(const std::string& key, const std::string& value);
+  void SetKey(const std::string& key);
+  void SetValue(const std::string& value);
+
+  int GetVersion() const { return this->key_.at(key_.size() - 1); }
+
+  const std::string& GetKey() const;
+  const std::string& GetValue() const;
+
+ private:
+  std::string key_;
+  std::string value_;
 };
 
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

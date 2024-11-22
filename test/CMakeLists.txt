@@ -44,7 +44,10 @@ file(GLOB TEST_DINGO_SERIAL_SRCS "test_*.cc")
 foreach(DINGO_SERIAL_UT ${TEST_DINGO_SERIAL_SRCS})
     get_filename_component(DINGO_SERIAL_UT_WE ${DINGO_SERIAL_UT} NAME_WE)
     add_executable(${DINGO_SERIAL_UT_WE} ${DINGO_SERIAL_UT}
-                   $<TARGET_OBJECTS:OBJ_LIB>)
+                   $<TARGET_OBJECTS:OBJ_LIB>
+            test_utils_v2.cc
+            test_utils_v2.cc
+    )
     target_link_libraries(${DINGO_SERIAL_UT_WE}
                           ${GTEST_MAIN_LIB}
                           ${GTEST_LIB}

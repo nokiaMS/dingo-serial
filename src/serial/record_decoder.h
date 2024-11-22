@@ -12,60 +12,168 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DINGO_SERIAL_RECORD_DECODER_H_
-#define DINGO_SERIAL_RECORD_DECODER_H_
+#ifndef DINGO_RECORD_DECODER_WRAPPER_H_
+#define DINGO_RECORD_DECODER_WRAPPER_H_
 
 #include <memory>
+#include <string>
 
-#include "any"
-#include "functional"
-#include "keyvalue.h"
-#include "optional"
-#include "serial/schema/boolean_list_schema.h"
-#include "serial/schema/boolean_schema.h"
-#include "serial/schema/double_list_schema.h"
-#include "serial/schema/double_schema.h"
-#include "serial/schema/float_list_schema.h"
-#include "serial/schema/float_schema.h"
-#include "serial/schema/integer_list_schema.h"
-#include "serial/schema/integer_schema.h"
-#include "serial/schema/long_list_schema.h"
-#include "serial/schema/long_schema.h"
-#include "serial/schema/string_list_schema.h"
-#include "serial/schema/string_schema.h"
-#include "serial/utils.h"
+#include "serial/record/V2/record_decoder.h"
+#include "serial/record/record_decoder.h"
+#include "serial/schema/base_schema.h"
+#include "utils/V2/keyvalue.h"
+#include "utils/keyvalue.h"
 
 namespace dingodb {
 
 class RecordDecoder {
  private:
-  bool CheckPrefix(Buf& buf) const;
-  bool CheckReverseTag(Buf& buf) const;
-  bool CheckSchemaVersion(Buf& buf) const;
+  int codec_version_;
+  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+      schemas_v1_;
+  std::vector<serialV2::BaseSchemaPtr> schemas_v2_;
 
-  int codec_version_ = 1;
-  int schema_version_;
-  std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas_;
-  long common_id_;
-  bool le_;
+  dingodb::RecordDecoderV1* re_v1_;
+  dingodb::serialV2::RecordDecoderV2* re_v2_;
+
+  // converter from v2 schemas to v1 schemas.
+  // std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>>
+  // ConvertSchemas2V1(
+  //    const std::vector<V2::BaseSchemaPtr>& schemas);
 
  public:
-  RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordDecoder(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
-                bool le);
+  // constructors for v1.
+  RecordDecoder(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id);
+  RecordDecoder(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id, bool le);
 
-  void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  // constructors for v2.
+  RecordDecoder(int schema_version,
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id);
+  RecordDecoder(int schema_version,
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id, bool le);
 
-  int Decode(const KeyValue& key_value, std::vector<std::any>& record /*output*/);
-  int Decode(const std::string& key, const std::string& value, std::vector<std::any>& record /*output*/);
-  int DecodeKey(const std::string& key, std::vector<std::any>& record /*output*/);
+  ~RecordDecoder() {
+    delete re_v1_;
+    delete re_v2_;
+  }
 
+  void Init(int schema_version,
+            std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+            long common_id) {
+    re_v1_->Init(schema_version, schemas, common_id);
+  }
+
+  // decode for v1.
+  int Decode(const KeyValue& key_value, std::vector<std::any>& record) {
+    return re_v1_->Decode(key_value, record);
+  }
+
+  // decode for v2.
+  int Decode(const serialV2::KeyValue& key_value,
+             std::vector<std::any>& record) {
+    if (DINGO_UNLIKELY(key_value.GetVersion() == serialV2::CODEC_VERSION_V1)) {
+      // This code branch is inefficient, but factly the code will not run here
+      // except the scenario that we are running the new verison(v2) on old
+      // data(v1), so we just keep the code like this.
+      auto key_value_v1 =
+          KeyValue(std::make_shared<std::string>(key_value.GetKey()),
+                   std::make_shared<std::string>(key_value.GetValue()));
+      return re_v1_->Decode(key_value_v1, record);
+    } else {
+      return re_v2_->Decode(key_value, record);
+    }
+  }
+
+  /*
+  int Decode(const serialV2::KeyValue& key_value,
+           std::vector<std::any>& record) {
+      return re_v2_->Decode(key_value, record);
+  }
+   */
+
+  int Decode(const std::string& key, const std::string& value,
+             std::vector<std::any>& record) {
+    auto key_len = key.size();
+    const char* p = key.data();
+    char a = key.at(key_len - 1);
+    if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
+      return re_v1_->Decode(key, value, record);
+    } else {
+      return re_v2_->Decode(key, value, record);
+    }
+  }
+
+  /*
+  int Decode(const std::string& key, const std::string& value,
+           std::vector<std::any>& record) {
+      return re_v2_->Decode(key, value, record);
+  }
+  */
+
+  int DecodeKey(const std::string& key, std::vector<std::any>& record) {
+    if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
+      return re_v1_->DecodeKey(key, record);
+    } else {
+      return re_v2_->DecodeKey(key, record);
+    }
+  }
+
+  /*
+  int DecodeKey(const std::string& key,
+            std::vector<std::any>& record) {
+      return re_v2_->DecodeKey(key, record);
+  }
+  */
+
+  // decode for v1.
   int Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
-             std::vector<std::any>& record /*output*/);
-  int Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
-             std::vector<std::any>& record /*output*/);
+             std::vector<std::any>& record) {
+    return re_v1_->Decode(key_value, column_indexes, record);
+  }
+
+  // decode for v2.
+  int Decode(const serialV2::KeyValue& key_value,
+             const std::vector<int>& column_indexes,
+             std::vector<std::any>& record /*output*/) {
+    return re_v2_->Decode(key_value, column_indexes, record);
+  }
+
+  int Decode(const std::string& key, const std::string& value,
+             const std::vector<int>& column_indexes,
+             std::vector<std::any>& record) {
+    if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
+      return re_v1_->Decode(key, value, column_indexes, record);
+    } else {
+      return re_v2_->Decode(key, value, column_indexes, record);
+    }
+  }
+
+  /*
+  int Decode(const std::string& key, const std::string& value,
+           const std::vector<int>& column_indexes,
+           std::vector<std::any>& record) {
+      return re_v2_->Decode(key, value, column_indexes, record);
+  }
+  */
+
+  int GetCodecVersion(std::string& key) {
+    if (key.empty()) {
+      throw std::runtime_error(
+          "key should not be empty in func GetCodecVersion.");
+    }
+
+    return key.c_str()[key.length() - 1];
+  }
 };
 
 }  // namespace dingodb
 
-#endif
+#endif  // DINGO_RECORD_DECODER_WRAPPER_H_
