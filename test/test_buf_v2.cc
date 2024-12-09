@@ -23,9 +23,9 @@
 #include <string>
 #include <utility>
 
-#include "serial/utilsV2/buf.h"
+#include "serial/utils/V2/buf.h"
 
-using namespace dingodb::V2;
+//using namespace dingodb::serialV2;
 
 void Print(const unsigned char* addr, uint32_t size) {
   for (uint32_t i = 0; i < size; ++i) {
@@ -61,7 +61,7 @@ TEST_F(BufTest, CastType) {
 
 TEST_F(BufTest, Build) {
   {
-    Buf buf(64, true);
+    dingodb::serialV2::Buf buf(64, true);
 
     ASSERT_EQ(0, buf.Size());
     ASSERT_EQ(true, buf.IsLe());
@@ -69,7 +69,7 @@ TEST_F(BufTest, Build) {
 
   {
     std::string s = "hello world";
-    Buf buf(s, true);
+    dingodb::serialV2::Buf buf(s, true);
 
     ASSERT_EQ(s.size(), buf.Size());
     ASSERT_EQ(true, buf.IsLe());
@@ -78,7 +78,7 @@ TEST_F(BufTest, Build) {
   {
     std::string s = "hello world";
     size_t size = s.size();
-    Buf buf(std::move(s), true);
+    dingodb::serialV2::Buf buf(std::move(s), true);
 
     ASSERT_TRUE(s.empty());
 
@@ -88,7 +88,7 @@ TEST_F(BufTest, Build) {
 }
 
 TEST_F(BufTest, WriteAndRead) {
-  Buf buf(64, true);
+  dingodb::serialV2::Buf buf(64, true);
 
   buf.Write(11);
   ASSERT_EQ(11, buf.Read());
@@ -100,7 +100,7 @@ TEST_F(BufTest, WriteAndRead) {
 }
 
 TEST_F(BufTest, WriteAndPeek) {
-  Buf buf(64, true);
+  dingodb::serialV2::Buf buf(64, true);
 
   buf.Write(0x11);
   buf.Write(0x12);
@@ -117,7 +117,7 @@ TEST_F(BufTest, WriteAndPeek) {
 }
 
 TEST_F(BufTest, ByteTest) {
-  Buf buf(3, true);
+  dingodb::serialV2::Buf buf(3, true);
 
   buf.Write((char)0x01);
   buf.Write((char)0x02);
@@ -141,7 +141,7 @@ TEST_F(BufTest, ByteTest) {
 }
 
 TEST_F(BufTest, ShortTest) {
-  Buf buf(6, true);
+  dingodb::serialV2::Buf buf(6, true);
   buf.ReSize(6);
 
   buf.WriteShort(0, (short)0x3132);
@@ -163,7 +163,7 @@ TEST_F(BufTest, ShortTest) {
 }
 
 TEST_F(BufTest, IntTest) {
-  Buf buf(12, true);
+  dingodb::serialV2::Buf buf(12, true);
   buf.ReSize(12);
 
   buf.WriteInt(0, (int)0x31323334);
@@ -192,7 +192,7 @@ TEST_F(BufTest, IntTest) {
 }
 
 TEST_F(BufTest, LongTest) {
-  Buf buf(24, true);
+  dingodb::serialV2::Buf buf(24, true);
 
   buf.WriteLong((long)0x31323334aabbccdd);
   buf.WriteLong((long)0x31323336aabbccdd);
@@ -220,7 +220,7 @@ TEST_F(BufTest, LongTest) {
 }
 
 TEST_F(BufTest, StringTest) {
-  Buf buf(100, true);
+  dingodb::serialV2::Buf buf(100, true);
 
   buf.WriteString("abcde12345");
   buf.WriteString("abcde12345");

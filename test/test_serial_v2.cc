@@ -25,12 +25,12 @@
 #include <string>
 #include <string_view>
 
-#include "serial/recordV2/record_decoder.h"
-#include "serial/recordV2/record_encoder.h"
-#include "serial/schemaV2/base_schema.h"
-#include "serial/utilsV2/utils.h"
+#include "serial/schema/V2/base_schema.h"
+#include "serial/record/V2/record_decoder.h"
+#include "serial/record/V2/record_encoder.h"
+#include "serial/utils/V2/utils.h"
 
-using namespace dingodb::V2;
+using namespace dingodb::serialV2;
 
 class DingoSerialTest : public testing::Test {
  public:

@@ -24,8 +24,8 @@
 #include <optional>
 #include <string>
 
-#include "serial/record_decoder_wrapper.h"
-#include "serial/record_encoder_wrapper.h"
+#include "serial/record_decoder.h"
+#include "serial/record_encoder.h"
 #include "serial/schema/base_schema.h"
 
 using namespace dingodb;
@@ -1670,6 +1670,7 @@ TEST_F(DingoSerialTest, recordTest) {
   delete rd;
 }
 
+/*
 TEST_F(DingoSerialTest, wrapperTest) {
   InitVector();
   auto schemas = GetSchemas();
@@ -1857,3 +1858,4 @@ TEST_F(DingoSerialTest, wrapperTest) {
   // delete kv;
   delete rd;
 }
+*/

@@ -29,12 +29,10 @@
 #include <utility>
 #include <vector>
 
-#include "serial/recordV2/record_decoder.h"
-#include "serial/recordV2/record_encoder.h"
-#include "serial/record_decoder_wrapper.h"
-#include "serial/record_encoder_wrapper.h"
-#include "serial/schemaV2/base_schema.h"
-#include "serial/utilsV2/utils.h"
+#include "serial/schema/V2/base_schema.h"
+#include "serial/record/V2/record_decoder.h"
+#include "serial/record/V2/record_encoder.h"
+#include "serial/record_encoder.h"
 #include "serial/schema/base_schema.h"
 #include "serial/schema/dingo_schema.h"
 
@@ -142,71 +140,71 @@ std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchem
   return schemas;
 }
 
-std::vector<dingodb::V2::BaseSchemaPtr> GenerateSchemas() {
-  std::vector<dingodb::V2::BaseSchemaPtr> schemas;
+std::vector<dingodb::serialV2::BaseSchemaPtr> GenerateSchemas() {
+  std::vector<dingodb::serialV2::BaseSchemaPtr> schemas;
   schemas.resize(11);
 
-  auto id = std::make_shared<dingodb::V2::DingoSchema<int32_t>>();
+  auto id = std::make_shared<dingodb::serialV2::DingoSchema<int32_t>>();
   id->SetIndex(0);
   id->SetAllowNull(false);
   id->SetIsKey(true);
   schemas.at(0) = id;
 
-  auto name = std::make_shared<dingodb::V2::DingoSchema<std::string>>();
+  auto name = std::make_shared<dingodb::serialV2::DingoSchema<std::string>>();
   name->SetIndex(1);
   name->SetAllowNull(false);
   name->SetIsKey(true);
   schemas.at(1) = name;
 
-  auto gender = std::make_shared<dingodb::V2::DingoSchema<std::string>>();
+  auto gender = std::make_shared<dingodb::serialV2::DingoSchema<std::string>>();
   gender->SetIndex(2);
   gender->SetAllowNull(false);
   gender->SetIsKey(true);
   schemas.at(2) = gender;
 
-  auto score = std::make_shared<dingodb::V2::DingoSchema<int64_t>>();
+  auto score = std::make_shared<dingodb::serialV2::DingoSchema<int64_t>>();
   score->SetIndex(3);
   score->SetAllowNull(false);
   score->SetIsKey(true);
   schemas.at(3) = score;
 
-  auto addr = std::make_shared<dingodb::V2::DingoSchema<std::string>>();
+  auto addr = std::make_shared<dingodb::serialV2::DingoSchema<std::string>>();
   addr->SetIndex(4);
   addr->SetAllowNull(true);
   addr->SetIsKey(false);
   schemas.at(4) = addr;
 
-  auto exist = std::make_shared<dingodb::V2::DingoSchema<bool>>();
+  auto exist = std::make_shared<dingodb::serialV2::DingoSchema<bool>>();
   exist->SetIndex(5);
   exist->SetAllowNull(false);
   exist->SetIsKey(false);
   schemas.at(5) = exist;
 
-  auto pic = std::make_shared<dingodb::V2::DingoSchema<std::string>>();
+  auto pic = std::make_shared<dingodb::serialV2::DingoSchema<std::string>>();
   pic->SetIndex(6);
   pic->SetAllowNull(true);
   pic->SetIsKey(false);
   schemas.at(6) = pic;
 
-  auto test_null = std::make_shared<dingodb::V2::DingoSchema<int32_t>>();
+  auto test_null = std::make_shared<dingodb::serialV2::DingoSchema<int32_t>>();
   test_null->SetIndex(7);
   test_null->SetAllowNull(true);
   test_null->SetIsKey(false);
   schemas.at(7) = test_null;
 
-  auto age = std::make_shared<dingodb::V2::DingoSchema<int32_t>>();
+  auto age = std::make_shared<dingodb::serialV2::DingoSchema<int32_t>>();
   age->SetIndex(8);
   age->SetAllowNull(false);
   age->SetIsKey(false);
   schemas.at(8) = age;
 
-  auto prev = std::make_shared<dingodb::V2::DingoSchema<int64_t>>();
+  auto prev = std::make_shared<dingodb::serialV2::DingoSchema<int64_t>>();
   prev->SetIndex(9);
   prev->SetAllowNull(false);
   prev->SetIsKey(false);
   schemas.at(9) = prev;
 
-  auto salary = std::make_shared<dingodb::V2::DingoSchema<double>>();
+  auto salary = std::make_shared<dingodb::serialV2::DingoSchema<double>>();
   salary->SetIndex(10);
   salary->SetAllowNull(true);
   salary->SetIsKey(false);
@@ -303,7 +301,7 @@ TEST_F(PerformanceTestV1V2, v1_encode_v2_decode) {
   dingodb::RecordEncoderV1 encoder(1, schemas_v1, 100);
 
   //v2 decoder.
-  dingodb::V2::RecordDecoderV2 decoder(1, schemas, 100);
+  dingodb::serialV2::RecordDecoderV2 decoder(1, schemas, 100);
 
   for (int i = 0; i < 1; i++) {
     for (const auto& record : records) {

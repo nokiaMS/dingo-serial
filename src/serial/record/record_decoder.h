@@ -16,6 +16,7 @@
 #define DINGO_SERIAL_RECORD_DECODER_H_
 
 #include <memory>
+#include <string>
 
 #include "any"
 #include "functional"
@@ -64,7 +65,7 @@ class RecordDecoderV1 {
              std::vector<std::any>& record /*output*/);
   int Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
              std::vector<std::any>& record /*output*/);
-  int GetCodecVersion();
+  int GetCodecVersion(Buf& buf);
 };
 
 }  // namespace dingodb

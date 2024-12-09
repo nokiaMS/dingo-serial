@@ -31,10 +31,10 @@
 
 #include "serial/record/record_encoder.h"
 #include "serial/record/record_decoder.h"
-#include "serial/recordV2/record_decoder.h"
+#include "serial/record/V2/record_decoder.h"
 #include "serial/schema/base_schema.h"
 
-using namespace dingodb;
+//using namespace dingodb;
 
 const char kAlphabet[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
                           'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
@@ -63,9 +63,9 @@ static std::string GenRandomString(int len) {
   return result;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> GenerateSchemasV1() {
-  std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas =
-      std::make_shared<std::vector<std::shared_ptr<BaseSchema>>>(11);
+std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchemasV1() {
+  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas =
+      std::make_shared<std::vector<std::shared_ptr<dingodb::BaseSchema>>>(11);
 
   auto id = std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
   id->SetIndex(0);
@@ -196,8 +196,8 @@ TEST_F(PerformanceTest, perfV1) {
   start_time = TimestampMs();
   std::cout << "Start testing..., count: " << loop_times << " ms" << std::endl;
 
-  RecordEncoderV1 encoder(1, schemas, 100);
-  RecordDecoderV1 decoder(1, schemas, 100);
+  dingodb::RecordEncoderV1 encoder(1, schemas, 100);
+  dingodb::RecordDecoderV1 decoder(1, schemas, 100);
 
   for (int i = 0; i < 1; i++) {
     for (const auto& record : records) {
