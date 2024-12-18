@@ -32,12 +32,12 @@ constexpr int kBufInitCapacity = 2048;
 using CastAndDecodeOrSkipFuncPointer =
     void (*)(BaseSchemaPtr schema, Buf& key_buf, Buf& value_buf,
              std::vector<std::any>& record, int record_index, bool skip,
-             std::map<int, int>& id_offset_map);
+             std::map<int, int>& id_offset_map, int total_col_cnt);
 
 template <typename T>
 void CastAndDecodeOrSkip(BaseSchemaPtr schema, Buf& key_buf, Buf& value_buf,
                          std::vector<std::any>& record, int record_index,
-                         bool is_skip, std::map<int, int>& id_offset_map) {
+                         bool is_skip, std::map<int, int>& id_offset_map, int total_col_cnt) {
   auto dingo_schema = std::dynamic_pointer_cast<DingoSchema<T>>(schema);
   if (is_skip) {
     if (schema->IsKey()) {
@@ -120,9 +120,9 @@ inline bool RecordDecoderV2::CheckSchemaVersion(Buf& buf) const {
 
 void DecodeOrSkip(BaseSchemaPtr schema, Buf& key_buf, Buf& value_buf,
                   std::vector<std::any>& record, int record_index, bool skip,
-                  std::map<int, int>& id_offset_map) {
+                  std::map<int, int>& id_offset_map, int total_col_cnt) {
   cast_and_decode_or_skip_func_ptrs[static_cast<int>(schema->GetType())](
-      schema, key_buf, value_buf, record, record_index, skip, id_offset_map);
+      schema, key_buf, value_buf, record, record_index, skip, id_offset_map, total_col_cnt);
 }
 
 int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
@@ -144,7 +144,9 @@ int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
   int offset_pos = 8 + 2 * total_col_cnt;
   int data_pos = offset_pos + 4 * total_col_cnt;
 
-  value_buf.SetReadOffset(data_pos);
+  if (total_col_cnt != cnt_null_col) {
+    value_buf.SetReadOffset(data_pos);
+  }
 
   std::map<int, int> col_id_offset_map;
   for (int i = 0; i < total_col_cnt; ++i) {
@@ -158,7 +160,7 @@ int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
   for (const auto& bs : schemas_) {
     if (bs) {
       DecodeOrSkip(bs, key_buf, value_buf, record, bs->GetIndex(), false,
-                   col_id_offset_map);
+                   col_id_offset_map, total_col_cnt);
     }
   }
 
@@ -184,7 +186,10 @@ int RecordDecoderV2::Decode(std::string&& key, std::string&& value,
   int offset_pos = 8 + 2 * total_col_cnt;
   int data_pos = offset_pos + 4 * total_col_cnt;
 
-  value_buf.SetReadOffset(data_pos);
+  if (total_col_cnt != cnt_null_col) {
+    //If not means all value fields are null.
+    value_buf.SetReadOffset(data_pos);
+  }
 
   std::map<int, int> col_id_offset_map;
   for (int i = 0; i < total_col_cnt; ++i) {
@@ -198,7 +203,7 @@ int RecordDecoderV2::Decode(std::string&& key, std::string&& value,
   for (const auto& bs : schemas_) {
     if (bs) {
       DecodeOrSkip(bs, key_buf, value_buf, record, bs->GetIndex(), false,
-                   col_id_offset_map);
+                   col_id_offset_map, total_col_cnt);
     }
   }
 
@@ -214,12 +219,13 @@ int RecordDecoderV2::DecodeKey(const std::string& key,
   }
 
   std::map<int, int> id_offset_map;
+  int total_col_cnt = 0;
 
   record.resize(schemas_.size());
   int index = 0;
   for (const auto& bs : schemas_) {
     if (bs && bs->IsKey()) {
-      DecodeOrSkip(bs, key_buf, key_buf, record, index, false, id_offset_map);
+      DecodeOrSkip(bs, key_buf, key_buf, record, index, false, id_offset_map, total_col_cnt);
     }
     index++;
   }
@@ -247,20 +253,14 @@ int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
   int cnt_null_col = value_buf.ReadShort();
   int total_col_cnt = cnt_not_null_col + cnt_null_col;
 
-  //DINGO_LOG(ERROR) << fmt::format("====>guoxu: cnt_not_null_col:{}, cnt_null_col:{}, total_col_cnt:{}", cnt_not_null_col, cnt_null_col, total_col_cnt);
-
-  if(total_col_cnt == 0) {
-    return 0;
-  }
-
   int ids_pos =
       8;  // schema_version(4 bytes) + col_cnt (2 bytes + 2bytes) = 8 bytes.
   int offset_pos = 8 + 2 * total_col_cnt;
   int data_pos = offset_pos + 4 * total_col_cnt;
 
-  //DINGO_LOG(ERROR) << fmt::format("====>guoxu: ids_pos:{}, offset_pos:{}, data_pos:{}", ids_pos, offset_pos, data_pos);
-
-  value_buf.SetReadOffset(data_pos);
+  if (total_col_cnt != cnt_null_col) {
+    value_buf.SetReadOffset(data_pos);
+  }
 
   std::map<int, int> col_id_offset_map;
   for (int i = 0; i < total_col_cnt; ++i) {
@@ -302,7 +302,7 @@ int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
     }
 
     DecodeOrSkip(schema, key_buf, value_buf, record, offset, offset == -1,
-                 col_id_offset_map);
+                 col_id_offset_map, total_col_cnt);
   }
 
   return 0;

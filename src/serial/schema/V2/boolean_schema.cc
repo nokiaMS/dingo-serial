@@ -38,22 +38,31 @@ namespace serialV2 {
  */
 
 // bool type length.
-constexpr int kDataLengthInValue = 1;
+constexpr int kDataLength = 1;
 
 // bool type length + null flag(1 byte)
-constexpr int kDataLengthInKey = kDataLengthInValue + 1;
+constexpr int kDataLengthWithNull = kDataLength + 1;
 
-inline int DingoSchema<bool>::GetLengthForKey() { return kDataLengthInKey; }
-inline int DingoSchema<bool>::GetLengthForValue() { return kDataLengthInValue; }
+inline int DingoSchema<bool>::GetLengthForKey() {
+  if(AllowNull()) {
+    return kDataLengthWithNull;
+  }
+  else {
+    return kDataLength;
+  }
+}
+
+inline int DingoSchema<bool>::GetLengthForValue() { return kDataLength; }
 
 int DingoSchema<bool>::SkipKey(Buf& buf) {
-  buf.Skip(kDataLengthInKey);
-  return kDataLengthInKey;
+  int len = GetLengthForKey();
+  buf.Skip(len);
+  return len;
 }
 
 int DingoSchema<bool>::SkipValue(Buf& buf) {
-  buf.Skip(kDataLengthInValue);
-  return kDataLengthInValue;
+  buf.Skip(kDataLength);
+  return kDataLength;
 }
 
 inline int DingoSchema<bool>::Encode(const std::any& data, Buf& buf,
@@ -77,11 +86,32 @@ inline int DingoSchema<bool>::Encode(const std::any& data, Buf& buf,
     }
   }
 
-  return forKey ? kDataLengthInKey : kDataLengthInValue;
+  return forKey ? GetLengthForKey() : kDataLength;
 }
 
 int DingoSchema<bool>::EncodeKey(const std::any& data, Buf& buf) {
-  return Encode(data, buf, true);
+  if (DINGO_UNLIKELY(!AllowNull() && !data.has_value())) {
+    throw std::runtime_error("Not allow null, but data not has value.");
+  }
+
+  if(AllowNull()) {
+    if (data.has_value()) {
+      buf.Write(k_not_null);
+      const auto& ref_data = std::any_cast<const bool&>(data);
+      buf.Write(ref_data ? 0x1 : 0x0);
+    } else {
+      buf.Write(k_null);
+      buf.Write(0x0);
+    }
+
+    return kDataLengthWithNull;
+  }
+  else {
+    const auto& ref_data = std::any_cast<const bool&>(data);
+    buf.Write(ref_data ? 0x1 : 0x0);
+
+    return kDataLength;
+  }
 }
 
 int DingoSchema<bool>::EncodeValue(const std::any& data, Buf& buf) {
@@ -89,9 +119,11 @@ int DingoSchema<bool>::EncodeValue(const std::any& data, Buf& buf) {
 }
 
 std::any DingoSchema<bool>::DecodeKey(Buf& buf) {
-  if (buf.Read() == k_null) {
-    buf.Skip(kDataLengthInKey - 1);  // The null flag has already been read.
-    return std::any();
+  if(AllowNull()) {
+    if (buf.Read() == k_null) {
+      buf.Skip(kDataLength);  // The null flag has already been read.
+      return std::any();
+    }
   }
 
   return std::any(static_cast<bool>(buf.Read()));

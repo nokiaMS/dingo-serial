@@ -469,7 +469,7 @@ TEST_F(SchemaTest, longType) {
     EXPECT_EQ(schema->GetLengthForKey(), schema->EncodeKey(data2, buf_key));
 
     int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(9, size);
+    EXPECT_EQ(8, size);
 
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(std::any_cast<int64_t>(actual_data_key),
@@ -667,7 +667,7 @@ TEST_F(SchemaTest, floatType) {
     EXPECT_EQ(schema->GetLengthForKey(), schema->EncodeKey(data2, buf_key));
 
     int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(5, size);
+    EXPECT_EQ(4, size);
 
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(std::any_cast<float>(actual_data_key),
@@ -869,7 +869,7 @@ TEST_F(SchemaTest, doubleType) {
     EXPECT_EQ(schema->GetLengthForKey(), schema->EncodeKey(data2, buf_key));
 
     int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(9, size);
+    EXPECT_EQ(8, size);
 
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(std::any_cast<double>(actual_data_key),
@@ -1052,11 +1052,11 @@ TEST_F(SchemaTest, stringType) {
 
     // for key.
     Buf buf_key(1024);
-    EXPECT_EQ(10, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(10, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
 
     int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(10, size);  // null flag | 8 bytes | 250
+    EXPECT_EQ(9, size);  // null flag | 8 bytes | 250
 
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
@@ -1078,6 +1078,40 @@ TEST_F(SchemaTest, stringType) {
   }
 
   {
+    auto schema = std::make_shared<DingoSchema<std::string>>();
+    schema->SetAllowNull(false);
+
+    std::any data1 = std::make_any<std::string>("");
+    std::any data2 = std::make_any<std::string>("");
+
+    // for key.
+    Buf buf_key(1024);
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+
+    int size = schema->SkipKey(buf_key);
+    EXPECT_EQ(9, size);  // null flag | 8 bytes | 250
+
+    auto actual_data_key = schema->DecodeKey(buf_key);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
+              std::any_cast<std::string>(data2));
+
+    // for value.
+    Buf buf_value(1024);
+    EXPECT_EQ(4, schema->EncodeValue(
+                     data1, buf_value));  // with no null flag in value.
+    EXPECT_EQ(4, schema->EncodeValue(
+                     data2, buf_value));  // with no null flag in value.
+
+    size = schema->SkipValue(buf_value);
+    EXPECT_EQ(4, size);  // len | 'hello'
+
+    auto actual_data_value = schema->DecodeValue(buf_value);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_value),
+              std::any_cast<std::string>(data2));
+  }
+
+  {
     /*
      * allowNull: false; with value.
      */
@@ -1089,11 +1123,11 @@ TEST_F(SchemaTest, stringType) {
 
     // for key.
     Buf buf_key(1024);
-    EXPECT_EQ(19, schema->EncodeKey(data1, buf_key));
-    EXPECT_EQ(19, schema->EncodeKey(data2, buf_key));
+    EXPECT_EQ(18, schema->EncodeKey(data1, buf_key));
+    EXPECT_EQ(18, schema->EncodeKey(data2, buf_key));
 
     int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(19, size);
+    EXPECT_EQ(18, size);
 
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
@@ -1140,6 +1174,40 @@ TEST_F(SchemaTest, stringType) {
 
     size = schema->SkipValue(buf_value);
     EXPECT_EQ(9, size);  // len | 'hello'
+
+    auto actual_data_value = schema->DecodeValue(buf_value);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_value),
+              std::any_cast<std::string>(data2));
+  }
+
+  {
+    auto schema = std::make_shared<DingoSchema<std::string>>();
+    schema->SetAllowNull(true);
+
+    std::any data1 = std::make_any<std::string>("");
+    std::any data2 = std::make_any<std::string>("");
+
+    // for key.
+    Buf buf_key(1024);
+    EXPECT_EQ(10, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(10, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+
+    int size = schema->SkipKey(buf_key);
+    EXPECT_EQ(10, size);  // null flag | 8 bytes | 250
+
+    auto actual_data_key = schema->DecodeKey(buf_key);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
+              std::any_cast<std::string>(data2));
+
+    // for value.
+    Buf buf_value(1024);
+    EXPECT_EQ(4, schema->EncodeValue(
+                     data1, buf_value));  // with no null flag in value.
+    EXPECT_EQ(4, schema->EncodeValue(
+                     data2, buf_value));  // with no null flag in value.
+
+    size = schema->SkipValue(buf_value);
+    EXPECT_EQ(4, size);  // len | 'hello'
 
     auto actual_data_value = schema->DecodeValue(buf_value);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_value),

@@ -68,15 +68,15 @@ class RecordDecoder {
     re_v1_->Init(schema_version, schemas, common_id);
   }
 
-  /*
+
   // decode for v1.
   int Decode(const KeyValue& key_value,
              std::vector<std::any>& record) {
     return re_v1_->Decode(key_value, record);
   }
-  */
 
-  /*
+
+
   // decode for v2.
   int Decode(const serialV2::KeyValue& key_value,
              std::vector<std::any>& record) {
@@ -92,13 +92,15 @@ class RecordDecoder {
       return re_v2_->Decode(key_value, record);
     }
   }
-  */
+
+  /*
   int Decode(const serialV2::KeyValue& key_value,
            std::vector<std::any>& record) {
       return re_v2_->Decode(key_value, record);
   }
+   */
 
-  /*
+
   int Decode(const std::string& key, const std::string& value,
              std::vector<std::any>& record) {
     auto key_len = key.size();
@@ -110,13 +112,15 @@ class RecordDecoder {
       return re_v2_->Decode(key, value, record);
     }
   }
-  */
+
+  /*
   int Decode(const std::string& key, const std::string& value,
            std::vector<std::any>& record) {
       return re_v2_->Decode(key, value, record);
   }
+  */
 
-  /*
+
   int DecodeKey(const std::string& key,
                 std::vector<std::any>& record) {
     if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
@@ -125,19 +129,21 @@ class RecordDecoder {
       return re_v2_->DecodeKey(key, record);
     }
   }
-  */
+
+  /*
   int DecodeKey(const std::string& key,
             std::vector<std::any>& record) {
       return re_v2_->DecodeKey(key, record);
   }
+  */
 
-  /*
+
   // decode for v1.
   int Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
              std::vector<std::any>& record) {
     return re_v1_->Decode(key_value, column_indexes, record);
   }
-  */
+
 
   // decode for v2.
   int Decode(const serialV2::KeyValue& key_value,
@@ -146,7 +152,7 @@ class RecordDecoder {
     return re_v2_->Decode(key_value, column_indexes, record);
   }
 
-  /*
+
   int Decode(const std::string& key, const std::string& value,
              const std::vector<int>& column_indexes,
              std::vector<std::any>& record) {
@@ -155,12 +161,15 @@ class RecordDecoder {
     } else {
       return re_v2_->Decode(key, value, column_indexes, record);
     }
-  }*/
+  }
+
+  /*
   int Decode(const std::string& key, const std::string& value,
            const std::vector<int>& column_indexes,
            std::vector<std::any>& record) {
       return re_v2_->Decode(key, value, column_indexes, record);
   }
+  */
 
   int GetCodecVersion(std::string& key) {
     if (key.empty()) {

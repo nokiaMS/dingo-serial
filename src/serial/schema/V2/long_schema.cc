@@ -21,8 +21,8 @@
 namespace dingodb {
 namespace serialV2 {
 
-constexpr int kDataLengthInValue = 8;
-constexpr int kDataLengthInKey = kDataLengthInValue + 1;
+constexpr int kDataLength = 8;
+constexpr int kDataLengthWithNull = kDataLength + 1;
 
 void DingoSchema<int64_t>::EncodeLongComparable(int64_t data, Buf& buf) {
   uint64_t* l = (uint64_t*)&data;
@@ -102,36 +102,51 @@ int64_t DingoSchema<int64_t>::DecodeLongNotComparable(Buf& buf) {
   return static_cast<int64_t>(l);
 }
 
-int DingoSchema<int64_t>::GetLengthForKey() { return kDataLengthInKey; }
-int DingoSchema<int64_t>::GetLengthForValue() { return kDataLengthInValue; }
+int DingoSchema<int64_t>::GetLengthForKey() {
+  if(AllowNull()) {
+    return kDataLengthWithNull;
+  }
+  else {
+    return kDataLength;
+  }
+}
+
+int DingoSchema<int64_t>::GetLengthForValue() { return kDataLength; }
 
 int DingoSchema<int64_t>::SkipKey(Buf& buf) {
-  buf.Skip(kDataLengthInKey);
-  return kDataLengthInKey;
+  int len = GetLengthForKey();
+  buf.Skip(len);
+  return len;
 }
 
 int DingoSchema<int64_t>::SkipValue(Buf& buf) {
-  buf.Skip(kDataLengthInValue);
-  return kDataLengthInValue;
+  buf.Skip(kDataLength);
+  return kDataLength;
 }
 
-// {is_null: 1byte}|{value: 8byte}
 int DingoSchema<int64_t>::EncodeKey(const std::any& data, Buf& buf) {
   if (DINGO_UNLIKELY(!AllowNull() && !data.has_value())) {
     throw std::runtime_error("Not allow null, but data not has value.");
   }
 
-  if (data.has_value()) {
-    buf.Write(k_not_null);
+  if(AllowNull()) {
+    if (data.has_value()) {
+      buf.Write(k_not_null);
+      const auto& ref_data = std::any_cast<const int64_t&>(data);
+      EncodeLongComparable(ref_data, buf);
+    } else {
+      buf.Write(k_null);
+      buf.WriteLong(0);
+    }
+
+    return kDataLengthWithNull;
+  }
+  else {
     const auto& ref_data = std::any_cast<const int64_t&>(data);
     EncodeLongComparable(ref_data, buf);
 
-  } else {
-    buf.Write(k_null);
-    buf.WriteLong(0);
+    return kDataLength;
   }
-
-  return kDataLengthInKey;
 }
 
 // {value: 8byte}
@@ -143,16 +158,18 @@ int DingoSchema<int64_t>::EncodeValue(const std::any& data, Buf& buf) {
   if (data.has_value()) {
     const auto& ref_data = std::any_cast<const int64_t&>(data);
     EncodeLongNotComparable(ref_data, buf);
-    return kDataLengthInValue;
+    return kDataLength;
   }
 
   return 0;
 }
 
 std::any DingoSchema<int64_t>::DecodeKey(Buf& buf) {
-  if (buf.Read() == k_null) {
-    buf.Skip(kDataLengthInKey - 1);
-    return std::any();
+  if(AllowNull()) {
+    if (buf.Read() == k_null) {
+      buf.Skip(kDataLength);
+      return std::any();
+    }
   }
 
   return std::any(DecodeLongComparable(buf));

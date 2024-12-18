@@ -25,8 +25,8 @@
 namespace dingodb {
 namespace serialV2 {
 
-constexpr int kDataLengthInValue = 8;
-constexpr int kDataLengthInKey = kDataLengthInValue + 1;
+constexpr int kDataLength = 8;
+constexpr int kDataLengthWithNull = kDataLength + 1;
 
 void DingoSchema<double>::EncodeDoubleComparable(double data, Buf& buf) {
   uint64_t bits;
@@ -146,17 +146,26 @@ double DingoSchema<double>::DecodeDoubleNotComparable(Buf& buf) {
   return *reinterpret_cast<double*>(v);
 }
 
-int DingoSchema<double>::GetLengthForKey() { return kDataLengthInKey; }
-int DingoSchema<double>::GetLengthForValue() { return kDataLengthInValue; }
+inline int DingoSchema<double>::GetLengthForKey() {
+  if(AllowNull()) {
+    return kDataLengthWithNull;
+  }
+  else {
+    return kDataLength;
+  }
+}
+
+int DingoSchema<double>::GetLengthForValue() { return kDataLength; }
 
 int DingoSchema<double>::SkipKey(Buf& buf) {
-  buf.Skip(kDataLengthInKey);
-  return kDataLengthInKey;
+  int len = GetLengthForKey();
+  buf.Skip(len);
+  return len;
 }
 
 int DingoSchema<double>::SkipValue(Buf& buf) {
-  buf.Skip(kDataLengthInValue);
-  return kDataLengthInValue;
+  buf.Skip(kDataLength);
+  return kDataLength;
 }
 
 // {is_null: 1byte}|{value: 8byte}
@@ -165,16 +174,22 @@ int DingoSchema<double>::EncodeKey(const std::any& data, Buf& buf) {
     throw std::runtime_error("Not allow null, but data not has value.");
   }
 
-  if (data.has_value()) {
-    buf.Write(k_not_null);
+  if(AllowNull()) {
+    if (data.has_value()) {
+      buf.Write(k_not_null);
+      const auto& ref_data = std::any_cast<const double&>(data);
+      EncodeDoubleComparable(ref_data, buf);
+    } else {
+      buf.Write(k_null);
+      buf.WriteLong(0);
+    }
+    return kDataLengthWithNull;
+  }
+  else {
     const auto& ref_data = std::any_cast<const double&>(data);
     EncodeDoubleComparable(ref_data, buf);
-  } else {
-    buf.Write(k_null);
-    buf.WriteLong(0);
+    return kDataLength;
   }
-
-  return kDataLengthInKey;
 }
 
 // {value: 8byte}
@@ -186,16 +201,18 @@ int DingoSchema<double>::EncodeValue(const std::any& data, Buf& buf) {
   if (data.has_value()) {
     const auto& ref_data = std::any_cast<const double&>(data);
     EncodeDoubleNotComparable(ref_data, buf);
-    return kDataLengthInValue;
+    return kDataLength;
   }
 
   return 0;
 }
 
 std::any DingoSchema<double>::DecodeKey(Buf& buf) {
-  if (buf.Read() == k_null) {
-    buf.Skip(kDataLengthInKey - 1);
-    return std::any();
+  if(AllowNull()) {
+    if (buf.Read() == k_null) {
+      buf.Skip(kDataLength);
+      return std::any();
+    }
   }
 
   return std::move(std::any(DecodeDoubleComparable(buf)));

@@ -138,6 +138,25 @@ std::vector<dingodb::serialV2::BaseSchemaPtr> GenerateSchemas() {
   return schemas;
 }
 
+std::vector<dingodb::serialV2::BaseSchemaPtr> GenerateSchemas1Column() {
+  std::vector<dingodb::serialV2::BaseSchemaPtr> schemas;
+  schemas.resize(2);
+
+  auto name = std::make_shared<dingodb::serialV2::DingoSchema<std::string>>();
+  name->SetIndex(0);
+  name->SetAllowNull(false);
+  name->SetIsKey(true);
+  schemas.at(0) = name;
+
+  auto author_id = std::make_shared<dingodb::serialV2::DingoSchema<int32_t>>();
+  author_id->SetIndex(1);
+  author_id->SetAllowNull(true);
+  author_id->SetIsKey(false);
+  schemas.at(1) = author_id;
+
+  return schemas;
+}
+
 std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchemasV1() {
   std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas =
       std::make_shared<std::vector<std::shared_ptr<dingodb::BaseSchema>>>(11);
@@ -240,6 +259,19 @@ std::vector<std::any> GenerateRecord(int32_t id) {
   record.at(8) = age;
   record.at(9) = prev;
   record.at(10) = salary;
+
+  return record;
+}
+
+std::vector<std::any> GenerateRecord1Column() {
+  std::vector<std::any> record;
+  record.resize(2);
+
+  std::string name = "abcd";
+
+
+  record.at(0) = name;
+  record.at(1) = std::any();
 
   return record;
 }
@@ -464,6 +496,39 @@ TEST_F(PerformanceTestV2, wrapperPerf_eq) {
   auto double4 = std::any_cast<std::optional<double>>(decode_record_v1.at(10)).value();
   EXPECT_EQ(double3, double4);
   */
+}
+
+TEST_F(PerformanceTestV2, wrapperPerf_value_only_1_column_and_is_null) {
+  /*
+   * Use the wrapperred decoder and recoder and V2 records.
+   */
+  std::vector<std::any> record = GenerateRecord1Column();
+  auto schemas = GenerateSchemas1Column();
+
+  dingodb::RecordEncoder encoder(1, schemas, 100);
+  //encoder.SetCodecVersion(0x02);
+
+  dingodb::RecordDecoder decoder(1, schemas, 100);
+
+  std::string key;
+  std::string value;
+  encoder.Encode('r', record, key, value);
+  EXPECT_EQ(encoder.GetCodecVersion(), 0x02);
+
+  std::vector<std::any> decode_record;
+  decoder.Decode(std::move(key), std::move(value), decode_record);
+  EXPECT_EQ(decoder.GetCodecVersion(key), 0X02);
+
+  //name.
+  auto name1 = std::any_cast<std::string>(record.at(0));
+  auto name2 = std::any_cast<std::string>(decode_record.at(0));
+  EXPECT_EQ(name1, name2);
+
+  //id.
+  auto id1 = (record.at(1).has_value()) ? std::any_cast<int32_t>(record.at(1)) : std::any();
+  auto id2 = (record.at(1).has_value()) ? std::any_cast<int32_t>(decode_record.at(1)) : std::any();
+  EXPECT_EQ(id1.has_value(), false);
+  EXPECT_EQ(id2.has_value(), false);
 }
 
 TEST_F(PerformanceTestV2, wrapperPerf_v1_schemas_to_v2_schemas) {

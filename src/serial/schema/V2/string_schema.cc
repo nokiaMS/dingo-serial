@@ -106,17 +106,27 @@ int DingoSchema<std::string>::GetLengthForValue() {
 }
 
 int DingoSchema<std::string>::SkipKey(Buf& buf) {
-  if (buf.Read() == k_null) {
-    return 1;
-  }
+  if (AllowNull()) {
+    if (buf.Read() == k_null) {
+      return 1;
+    }
 
-  std::string data(1024, 0);
-  int size = DecodeBytesComparable(buf, data);
-  if (size == -1) {
-    throw std::runtime_error("decode comparable string error.");
-  }
+    std::string data(1024, 0);
+    int size = DecodeBytesComparable(buf, data);
+    if (size == -1) {
+      throw std::runtime_error("decode comparable string error.");
+    }
 
-  return size + 1;  // with null flag.
+    return size + 1;  // with null flag.
+  } else {
+    std::string data(1024, 0);
+    int size = DecodeBytesComparable(buf, data);
+    if (size == -1) {
+      throw std::runtime_error("decode comparable string error.");
+    }
+
+    return size;
+  }
 }
 
 int DingoSchema<std::string>::SkipValue(Buf& buf) {
@@ -126,25 +136,26 @@ int DingoSchema<std::string>::SkipValue(Buf& buf) {
   return size + 4;
 }
 
-// {is_null: 1byte}|{value: nbyte}
 int DingoSchema<std::string>::EncodeKey(const std::any& data, Buf& buf) {
   if (DINGO_UNLIKELY(!AllowNull() && !data.has_value())) {
     throw std::runtime_error("data not has value.");
   }
-
-  if (data.has_value()) {
-    buf.Write(k_not_null);
-    const auto& ref_data = std::any_cast<const std::string&>(data);
-
-    if (!ref_data.empty()) {
+  if (AllowNull()) {
+    if (data.has_value()) {
+      buf.Write(k_not_null);
+      const auto& ref_data = std::any_cast<const std::string&>(data);
       return EncodeBytesComparable(ref_data, buf) + 1;
     } else {
       buf.Write(k_null);
       return 1;
     }
   } else {
-    buf.Write(k_null);
-    return 1;
+    if (data.has_value()) {
+      const auto& ref_data = std::any_cast<const std::string&>(data);
+      return EncodeBytesComparable(ref_data, buf);
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -162,8 +173,10 @@ int DingoSchema<std::string>::EncodeValue(const std::any& data, Buf& buf) {
 }
 
 std::any DingoSchema<std::string>::DecodeKey(Buf& buf) {
-  if (buf.Read() == k_null) {
-    return std::any();
+  if (AllowNull()) {
+    if (buf.Read() == k_null) {
+      return std::any();
+    }
   }
 
   std::string data;
