@@ -17,9 +17,9 @@
 #include <optional>
 #include <string>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/record_decoder.h"
+#include "serial/schema/V2/base_schema.h"
 #include "serial/schema/base_schema.h"
 #include "serial/utils/V2/schema_converter.h"
 
@@ -34,7 +34,8 @@ RecordDecoder::RecordDecoder(
   schemas_v1_ = schemas;
   schemas_v2_ = ConvertSchemasV2(schemas);
   re_v1_ = new RecordDecoderV1(schema_version, schemas, common_id);
-  re_v2_ = new serialV2::RecordDecoderV2(schema_version, schemas_v2_, common_id);
+  re_v2_ =
+      new serialV2::RecordDecoderV2(schema_version, schemas_v2_, common_id);
 }
 
 // constructor for v1.
@@ -46,31 +47,29 @@ RecordDecoder::RecordDecoder(
   schemas_v1_ = schemas;
   schemas_v2_ = ConvertSchemasV2(schemas);
   re_v1_ = new RecordDecoderV1(schema_version, schemas, common_id, le);
-  re_v2_ = new serialV2::RecordDecoderV2(schema_version, schemas_v2_, common_id);
+  re_v2_ =
+      new serialV2::RecordDecoderV2(schema_version, schemas_v2_, common_id);
 }
 
 // constructor for v2.
-RecordDecoder::RecordDecoder(int schema_version,
-                             const std::vector<serialV2::BaseSchemaPtr>& schemas,
-                             long common_id) {
+RecordDecoder::RecordDecoder(
+    int schema_version, const std::vector<serialV2::BaseSchemaPtr>& schemas,
+    long common_id) {
   codec_version_ = serialV2::CODEC_VERSION_V2;
   schemas_v1_ = ConvertSchemasV1(schemas);
-  re_v1_ =
-      new RecordDecoderV1(schema_version, schemas_v1_, common_id);
+  re_v1_ = new RecordDecoderV1(schema_version, schemas_v1_, common_id);
   re_v2_ = new serialV2::RecordDecoderV2(schema_version, schemas, common_id);
 }
 
 // constructor for v2.
-RecordDecoder::RecordDecoder(int schema_version,
-                             const std::vector<serialV2::BaseSchemaPtr>& schemas,
-                             long common_id, bool le) {
+RecordDecoder::RecordDecoder(
+    int schema_version, const std::vector<serialV2::BaseSchemaPtr>& schemas,
+    long common_id, bool le) {
   codec_version_ = serialV2::CODEC_VERSION_V2;
   schemas_v1_ = ConvertSchemasV1(schemas);
-  re_v1_ =
-      new RecordDecoderV1(schema_version, schemas_v1_, common_id, le);
-  re_v2_ = new serialV2::RecordDecoderV2(schema_version, schemas, common_id, le);
+  re_v1_ = new RecordDecoderV1(schema_version, schemas_v1_, common_id, le);
+  re_v2_ =
+      new serialV2::RecordDecoderV2(schema_version, schemas, common_id, le);
 }
-
-
 
 }  // namespace dingodb

@@ -19,12 +19,17 @@
 
 namespace dingodb {
 
-int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetDataLength() { return 0; }
+int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetDataLength() {
+  return 0;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetWithNullTagLength() { return 0; }
+int DingoSchema<
+    std::optional<std::shared_ptr<std::string>>>::GetWithNullTagLength() {
+  return 0;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::string>>>::InternalEncodeKey(Buf* buf,
-                                                                                std::shared_ptr<std::string> data) {
+int DingoSchema<std::optional<std::shared_ptr<std::string>>>::InternalEncodeKey(
+    Buf* buf, std::shared_ptr<std::string> data) {
   int group_num = data->length() / 8;
   int size = (group_num + 1) * 9;
   int remainder_size = data->length() % 8;
@@ -55,22 +60,35 @@ int DingoSchema<std::optional<std::shared_ptr<std::string>>>::InternalEncodeKey(
   return size;
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::InternalEncodeValue(Buf* buf,
-                                                                                   std::shared_ptr<std::string> data) {
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::
+    InternalEncodeValue(Buf* buf, std::shared_ptr<std::string> data) {
   buf->EnsureRemainder(data->length() + 4);
   buf->WriteInt(data->length());
   buf->Write(*data);
 }
 
-BaseSchema::Type DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetType() { return kString; }
+BaseSchema::Type
+DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetType() {
+  return kString;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetIndex(int index) { this->index_ = index; }
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetIndex(
+    int index) {
+  this->index_ = index;
+}
 
-int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetIndex() { return this->index_; }
+int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetIndex() {
+  return this->index_;
+}
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetIsKey(bool key) { this->key_ = key; }
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetIsKey(
+    bool key) {
+  this->key_ = key;
+}
 
-bool DingoSchema<std::optional<std::shared_ptr<std::string>>>::IsKey() { return this->key_; }
+bool DingoSchema<std::optional<std::shared_ptr<std::string>>>::IsKey() {
+  return this->key_;
+}
 
 int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetLength() {
   if (this->allow_null_) {
@@ -79,11 +97,14 @@ int DingoSchema<std::optional<std::shared_ptr<std::string>>>::GetLength() {
   return GetDataLength();
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetAllowNull(bool allow_null) {
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SetAllowNull(
+    bool allow_null) {
   this->allow_null_ = allow_null;
 }
 
-bool DingoSchema<std::optional<std::shared_ptr<std::string>>>::AllowNull() { return this->allow_null_; }
+bool DingoSchema<std::optional<std::shared_ptr<std::string>>>::AllowNull() {
+  return this->allow_null_;
+}
 
 void DingoSchema<std::optional<std::shared_ptr<std::string>>>::EncodeKey(
     Buf* buf, std::optional<std::shared_ptr<std::string>> data) {
@@ -130,8 +151,8 @@ void DingoSchema<std::optional<std::shared_ptr<std::string>>>::EncodeKeyPrefix(
   }
 }
 
-std::optional<std::shared_ptr<std::string>> DingoSchema<std::optional<std::shared_ptr<std::string>>>::DecodeKey(
-    Buf* buf) {
+std::optional<std::shared_ptr<std::string>>
+DingoSchema<std::optional<std::shared_ptr<std::string>>>::DecodeKey(Buf* buf) {
   if (this->allow_null_) {
     if (buf->Read() == this->k_null) {
       buf->ReverseSkipInt();
@@ -168,7 +189,8 @@ std::optional<std::shared_ptr<std::string>> DingoSchema<std::optional<std::share
   return std::optional<std::shared_ptr<std::string>>(data);
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SkipKey(Buf* buf) const {
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SkipKey(
+    Buf* buf) const {
   if (this->allow_null_) {
     buf->Skip(buf->ReverseReadInt() + 1);
   } else {
@@ -195,8 +217,8 @@ void DingoSchema<std::optional<std::shared_ptr<std::string>>>::EncodeValue(
   }
 }
 
-std::optional<std::shared_ptr<std::string>> DingoSchema<std::optional<std::shared_ptr<std::string>>>::DecodeValue(
-    Buf* buf) {
+std::optional<std::shared_ptr<std::string>> DingoSchema<
+    std::optional<std::shared_ptr<std::string>>>::DecodeValue(Buf* buf) {
   if (this->allow_null_) {
     if (buf->Read() == this->k_null) {
       return std::nullopt;
@@ -212,7 +234,8 @@ std::optional<std::shared_ptr<std::string>> DingoSchema<std::optional<std::share
   return std::optional<std::shared_ptr<std::string>>{su8};
 }
 
-void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SkipValue(Buf* buf) const {
+void DingoSchema<std::optional<std::shared_ptr<std::string>>>::SkipValue(
+    Buf* buf) const {
   if (this->allow_null_) {
     if (buf->Read() == this->k_null) {
       return;

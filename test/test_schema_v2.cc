@@ -26,9 +26,9 @@
 #include <string>
 #include <vector>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
+#include "serial/schema/V2/base_schema.h"
 
 using namespace dingodb::serialV2;
 

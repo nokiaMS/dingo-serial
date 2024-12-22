@@ -24,13 +24,17 @@ namespace dingodb {
 
 // TODO cast and decode function not good, optimize on 0.8.0 or later
 
-using CastAndDecodeOrSkipFuncPointer = void (*)(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& value_buf,
-                                                std::vector<std::any>& record, int record_index, bool skip);
+using CastAndDecodeOrSkipFuncPointer = void (*)(
+    const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& value_buf,
+    std::vector<std::any>& record, int record_index, bool skip);
 
 template <typename T>
-void CastAndDecodeOrSkip(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& value_buf,
-                         std::vector<std::any>& record, int record_index, bool skip) {
-  auto dingo_schema = std::dynamic_pointer_cast<DingoSchema<std::optional<T>>>(schema);
+void CastAndDecodeOrSkip(const std::shared_ptr<BaseSchema>& schema,
+                         Buf& key_buf, Buf& value_buf,
+                         std::vector<std::any>& record, int record_index,
+                         bool skip) {
+  auto dingo_schema =
+      std::dynamic_pointer_cast<DingoSchema<std::optional<T>>>(schema);
   if (skip) {
     if (schema->IsKey()) {
       dingo_schema->SkipKey(&key_buf);
@@ -65,20 +69,26 @@ CastAndDecodeOrSkipFuncPointer cast_and_decode_or_skip_func_ptrs[] = {
     CastAndDecodeOrSkip<std::shared_ptr<std::vector<std::string>>>,
 };
 
-RecordDecoderV1::RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
-                             long common_id) {
+RecordDecoderV1::RecordDecoderV1(
+    int schema_version,
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+    long common_id) {
   this->le_ = IsLE();
   Init(schema_version, schemas, common_id);
 }
 
-RecordDecoderV1::RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
-                             long common_id, bool le) {
+RecordDecoderV1::RecordDecoderV1(
+    int schema_version,
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+    long common_id, bool le) {
   this->le_ = le;
   Init(schema_version, schemas, common_id);
 }
 
-void RecordDecoderV1::Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
-                         long common_id) {
+void RecordDecoderV1::Init(
+    int schema_version,
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+    long common_id) {
   this->schema_version_ = schema_version;
   FormatSchema(schemas, this->le_);
   this->schemas_ = schemas;
@@ -99,17 +109,21 @@ bool RecordDecoderV1::CheckReverseTag(Buf& buf) const {
   return false;
 }
 
-bool RecordDecoderV1::CheckSchemaVersion(Buf& buf) const { return buf.ReadInt() <= schema_version_; }
+bool RecordDecoderV1::CheckSchemaVersion(Buf& buf) const {
+  return buf.ReadInt() <= schema_version_;
+}
 
 int GetCodecVersion(Buf& buf) { return buf.ReversePeek(); }
 
-void DecodeOrSkip(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf, Buf& value_buf,
-                  std::vector<std::any>& record, int record_index, bool skip) {
-  cast_and_decode_or_skip_func_ptrs[static_cast<int>(schema->GetType())](schema, key_buf, value_buf, record,
-                                                                         record_index, skip);
+void DecodeOrSkip(const std::shared_ptr<BaseSchema>& schema, Buf& key_buf,
+                  Buf& value_buf, std::vector<std::any>& record,
+                  int record_index, bool skip) {
+  cast_and_decode_or_skip_func_ptrs[static_cast<int>(schema->GetType())](
+      schema, key_buf, value_buf, record, record_index, skip);
 }
 
-int RecordDecoderV1::Decode(const std::string& key, const std::string& value, std::vector<std::any>& record) {
+int RecordDecoderV1::Decode(const std::string& key, const std::string& value,
+                            std::vector<std::any>& record) {
   Buf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
   if (!CheckPrefix(key_buf)) {
@@ -137,7 +151,8 @@ int RecordDecoderV1::Decode(const std::string& key, const std::string& value, st
   return 0;
 }
 
-int RecordDecoderV1::DecodeKey(const std::string& key, std::vector<std::any>& record /*output*/) {
+int RecordDecoderV1::DecodeKey(const std::string& key,
+                               std::vector<std::any>& record /*output*/) {
   Buf key_buf(key, this->le_);
 
   if (!CheckPrefix(key_buf)) {
@@ -162,15 +177,18 @@ int RecordDecoderV1::DecodeKey(const std::string& key, std::vector<std::any>& re
   return 0;
 }
 
-int RecordDecoderV1::Decode(const KeyValue& key_value, std::vector<std::any>& record) {
+int RecordDecoderV1::Decode(const KeyValue& key_value,
+                            std::vector<std::any>& record) {
   return Decode(*key_value.GetKey(), *key_value.GetValue(), record);
 }
 
-inline bool IsSkipOnly(const std::vector<std::pair<int32_t, int32_t>>& indexed_mapping_index, int32_t& n, int32_t& m,
-                       int& record_index) {
+inline bool IsSkipOnly(
+    const std::vector<std::pair<int32_t, int32_t>>& indexed_mapping_index,
+    int32_t& n, int32_t& m, int& record_index) {
   int first = indexed_mapping_index[n].first;
   int second = indexed_mapping_index[n].second;
-  // DINGO_LOG(DEBUG) << "(" << first << ", " << second << ", " << m << "," << n << ") ";
+  // DINGO_LOG(DEBUG) << "(" << first << ", " << second << ", " << m << "," << n
+  // << ") ";
   if (first == m++) {
     record_index = second;
     n++;
@@ -180,11 +198,13 @@ inline bool IsSkipOnly(const std::vector<std::pair<int32_t, int32_t>>& indexed_m
   }
 }
 
-int RecordDecoderV1::Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
-                          std::vector<std::any>& record) {
+int RecordDecoderV1::Decode(const std::string& key, const std::string& value,
+                            const std::vector<int>& column_indexes,
+                            std::vector<std::any>& record) {
   Buf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
-  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf) || !CheckSchemaVersion(value_buf)) {
+  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf) ||
+      !CheckSchemaVersion(value_buf)) {
     return -1;
   }
 
@@ -222,9 +242,11 @@ int RecordDecoderV1::Decode(const std::string& key, const std::string& value, co
   return 0;
 }
 
-int RecordDecoderV1::Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
-                          std::vector<std::any>& record) {
-  return Decode(*key_value.GetKey(), *key_value.GetValue(), column_indexes, record);
+int RecordDecoderV1::Decode(const KeyValue& key_value,
+                            const std::vector<int>& column_indexes,
+                            std::vector<std::any>& record) {
+  return Decode(*key_value.GetKey(), *key_value.GetValue(), column_indexes,
+                record);
 }
 
 }  // namespace dingodb

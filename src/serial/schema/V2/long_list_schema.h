@@ -48,7 +48,7 @@ class DingoSchema<std::vector<int64_t>> : public BaseSchema {
   void DecodeLongList(Buf& buf, std::vector<int64_t>& data) const;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

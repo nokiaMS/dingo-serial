@@ -44,7 +44,7 @@ class DingoSchema<bool> : public BaseSchema {
   int Encode(const std::any& data, Buf& buf, bool nullFlag);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

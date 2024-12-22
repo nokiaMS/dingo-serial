@@ -16,9 +16,9 @@
 
 #include <any>
 #include <cstdint>
+#include <stdexcept>
 #include <utility>
 #include <vector>
-#include <stdexcept>
 
 #include "serial/utils/V2/compiler.h"
 
@@ -90,5 +90,5 @@ std::any DingoSchema<std::vector<bool>>::DecodeValue(Buf& buf) {
   return std::move(std::any(std::move(data)));
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

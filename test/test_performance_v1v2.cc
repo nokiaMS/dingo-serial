@@ -29,10 +29,10 @@
 #include <utility>
 #include <vector>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
 #include "serial/record_encoder.h"
+#include "serial/schema/V2/base_schema.h"
 #include "serial/schema/base_schema.h"
 #include "serial/schema/dingo_schema.h"
 
@@ -63,7 +63,8 @@ static std::string GenRandomString(int len) {
   return result;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchemasV1() {
+std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+GenerateSchemasV1() {
   std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas =
       std::make_shared<std::vector<std::shared_ptr<dingodb::BaseSchema>>>(11);
 
@@ -113,7 +114,8 @@ std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchem
   pic->SetIsKey(false);
   schemas->at(6) = pic;
 
-  auto test_null = std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
+  auto test_null =
+      std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
   test_null->SetIndex(7);
   test_null->SetAllowNull(true);
   test_null->SetIsKey(false);
@@ -259,12 +261,12 @@ std::vector<std::any> GenerateRecordV1(int32_t id) {
 
   record.at(0) = std::optional<int32_t>(id);
   record.at(1) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(name)};
+      std::make_shared<std::string>(name)};
   record.at(2) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(gender)};
+      std::make_shared<std::string>(gender)};
   record.at(3) = std::optional<int64_t>(score);
   record.at(4) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(addr)};
+      std::make_shared<std::string>(addr)};
   record.at(5) = std::optional<bool>(exist);
   record.at(6) = pic;
   record.at(7) = test_null;
@@ -297,10 +299,10 @@ TEST_F(PerformanceTestV1V2, v1_encode_v2_decode) {
   start_time = TimestampMs();
   std::cout << "Start testing..., count: " << loop_times << " ms" << std::endl;
 
-  //v1 encoder.
+  // v1 encoder.
   dingodb::RecordEncoderV1 encoder(1, schemas_v1, 100);
 
-  //v2 decoder.
+  // v2 decoder.
   dingodb::serialV2::RecordDecoderV2 decoder(1, schemas, 100);
 
   for (int i = 0; i < 1; i++) {
@@ -318,5 +320,3 @@ TEST_F(PerformanceTestV1V2, v1_encode_v2_decode) {
   std::cout << "Encode/Decode elapsed time: " << TimestampMs() - start_time
             << "ms" << std::endl;
 }
-
-

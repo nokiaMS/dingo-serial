@@ -181,5 +181,5 @@ int RecordEncoderV2::EncodeMinKeyPrefix(char prefix,
   return output.size();
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

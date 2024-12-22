@@ -163,11 +163,15 @@ uint8_t Buf::Peek() { return buf_.at(forward_pos_); }
 
 int32_t Buf::PeekInt() {
   if (this->le_) {
-    return ((buf_.at(forward_pos_) & 0xFF) << 24) | ((buf_.at(forward_pos_ + 1) & 0xFF) << 16) |
-           ((buf_.at(forward_pos_ + 2) & 0xFF) << 8) | (buf_.at(forward_pos_ + 3) & 0xFF);
+    return ((buf_.at(forward_pos_) & 0xFF) << 24) |
+           ((buf_.at(forward_pos_ + 1) & 0xFF) << 16) |
+           ((buf_.at(forward_pos_ + 2) & 0xFF) << 8) |
+           (buf_.at(forward_pos_ + 3) & 0xFF);
   } else {
-    return ((buf_.at(forward_pos_) & 0xFF) | ((buf_.at(forward_pos_ + 1) & 0xFF) << 8) |
-            ((buf_.at(forward_pos_ + 2) & 0xFF) << 16) | ((buf_.at(forward_pos_ + 3) & 0xFF) << 24));
+    return ((buf_.at(forward_pos_) & 0xFF) |
+            ((buf_.at(forward_pos_ + 1) & 0xFF) << 8) |
+            ((buf_.at(forward_pos_ + 2) & 0xFF) << 16) |
+            ((buf_.at(forward_pos_ + 3) & 0xFF) << 24));
   }
 }
 
@@ -191,9 +195,11 @@ uint8_t Buf::ReversePeek() { return buf_.at(reverse_pos_); }
 
 int32_t Buf::ReadInt() {
   if (this->le_) {
-    return ((Read() & 0xFF) << 24) | ((Read() & 0xFF) << 16) | ((Read() & 0xFF) << 8) | (Read() & 0xFF);
+    return ((Read() & 0xFF) << 24) | ((Read() & 0xFF) << 16) |
+           ((Read() & 0xFF) << 8) | (Read() & 0xFF);
   } else {
-    return (Read() & 0xFF) | ((Read() & 0xFF) << 8) | ((Read() & 0xFF) << 16) | ((Read() & 0xFF) << 24);
+    return (Read() & 0xFF) | ((Read() & 0xFF) << 8) | ((Read() & 0xFF) << 16) |
+           ((Read() & 0xFF) << 24);
   }
 }
 
@@ -222,11 +228,11 @@ uint8_t Buf::ReverseRead() { return buf_.at(reverse_pos_--); }
 
 int32_t Buf::ReverseReadInt() {
   if (this->le_) {
-    return ((ReverseRead() & 0xFF) << 24) | ((ReverseRead() & 0xFF) << 16) | ((ReverseRead() & 0xFF) << 8) |
-           (ReverseRead() & 0xFF);
+    return ((ReverseRead() & 0xFF) << 24) | ((ReverseRead() & 0xFF) << 16) |
+           ((ReverseRead() & 0xFF) << 8) | (ReverseRead() & 0xFF);
   } else {
-    return (ReverseRead() & 0xFF) | ((ReverseRead() & 0xFF) << 8) | ((ReverseRead() & 0xFF) << 16) |
-           ((ReverseRead() & 0xFF) << 24);
+    return (ReverseRead() & 0xFF) | ((ReverseRead() & 0xFF) << 8) |
+           ((ReverseRead() & 0xFF) << 16) | ((ReverseRead() & 0xFF) << 24);
   }
 }
 

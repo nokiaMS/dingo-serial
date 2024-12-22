@@ -14,11 +14,11 @@
 
 #include "double_schema.h"
 
+#include <any>
 #include <cstdint>
 #include <cstring>
-#include <utility>
 #include <stdexcept>
-#include <any>
+#include <utility>
 
 #include "serial/utils/V2/compiler.h"
 
@@ -147,10 +147,9 @@ double DingoSchema<double>::DecodeDoubleNotComparable(Buf& buf) {
 }
 
 inline int DingoSchema<double>::GetLengthForKey() {
-  if(AllowNull()) {
+  if (AllowNull()) {
     return kDataLengthWithNull;
-  }
-  else {
+  } else {
     return kDataLength;
   }
 }
@@ -174,7 +173,7 @@ int DingoSchema<double>::EncodeKey(const std::any& data, Buf& buf) {
     throw std::runtime_error("Not allow null, but data not has value.");
   }
 
-  if(AllowNull()) {
+  if (AllowNull()) {
     if (data.has_value()) {
       buf.Write(k_not_null);
       const auto& ref_data = std::any_cast<const double&>(data);
@@ -184,8 +183,7 @@ int DingoSchema<double>::EncodeKey(const std::any& data, Buf& buf) {
       buf.WriteLong(0);
     }
     return kDataLengthWithNull;
-  }
-  else {
+  } else {
     const auto& ref_data = std::any_cast<const double&>(data);
     EncodeDoubleComparable(ref_data, buf);
     return kDataLength;
@@ -208,7 +206,7 @@ int DingoSchema<double>::EncodeValue(const std::any& data, Buf& buf) {
 }
 
 std::any DingoSchema<double>::DecodeKey(Buf& buf) {
-  if(AllowNull()) {
+  if (AllowNull()) {
     if (buf.Read() == k_null) {
       buf.Skip(kDataLength);
       return std::any();
@@ -222,5 +220,5 @@ inline std::any DingoSchema<double>::DecodeValue(Buf& buf) {
   return std::move(std::any(DecodeDoubleNotComparable(buf)));
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

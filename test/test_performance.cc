@@ -29,12 +29,12 @@
 #include <utility>
 #include <vector>
 
-#include "serial/record/record_encoder.h"
-#include "serial/record/record_decoder.h"
 #include "serial/record/V2/record_decoder.h"
+#include "serial/record/record_decoder.h"
+#include "serial/record/record_encoder.h"
 #include "serial/schema/base_schema.h"
 
-//using namespace dingodb;
+// using namespace dingodb;
 
 const char kAlphabet[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
                           'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
@@ -63,7 +63,8 @@ static std::string GenRandomString(int len) {
   return result;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchemasV1() {
+std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+GenerateSchemasV1() {
   std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas =
       std::make_shared<std::vector<std::shared_ptr<dingodb::BaseSchema>>>(11);
 
@@ -113,7 +114,8 @@ std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchem
   pic->SetIsKey(false);
   schemas->at(6) = pic;
 
-  auto test_null = std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
+  auto test_null =
+      std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
   test_null->SetIndex(7);
   test_null->SetAllowNull(true);
   test_null->SetIsKey(false);
@@ -213,4 +215,3 @@ TEST_F(PerformanceTest, perfV1) {
   std::cout << "Encode/Decode elapsed time: " << TimestampMs() - start_time
             << "ms" << std::endl;
 }
-

@@ -20,8 +20,8 @@
 #include <memory>
 #include <string>
 
-#include "serial/utils/V2/buf.h"
 #include "serial/schema/dingo_schema.h"
+#include "serial/utils/V2/buf.h"
 
 namespace dingodb {
 namespace serialV2 {
@@ -121,7 +121,7 @@ class BaseSchema {
   int index_;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

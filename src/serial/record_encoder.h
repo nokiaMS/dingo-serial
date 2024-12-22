@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include "serial/record/record_encoder.h"
 #include "serial/record/V2/record_encoder.h"
+#include "serial/record/record_encoder.h"
 #include "serial/schema/base_schema.h"
 #include "serial/utils/V2/compiler.h"
 #include "serial/utils/V2/schema_converter.h"
@@ -31,7 +31,8 @@ namespace dingodb {
 class RecordEncoder {
  private:
   int codec_version_;
-  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas_v1_;
+  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+      schemas_v1_;
   std::vector<serialV2::BaseSchemaPtr> schemas_v2_;
 
   dingodb::RecordEncoderV1* re_v1_;
@@ -50,23 +51,20 @@ class RecordEncoder {
 
   // constructors for version 2.
   RecordEncoder(int schema_version,
-                const std::vector<serialV2::BaseSchemaPtr>& schemas, long common_id);
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id);
   RecordEncoder(int schema_version,
-                const std::vector<serialV2::BaseSchemaPtr>& schemas, long common_id,
-                bool le);
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id, bool le);
 
   ~RecordEncoder() {
     delete re_v1_;
     delete re_v2_;
   }
 
-  void SetCodecVersion(int v) {
-    this->codec_version_ = v;
-  }
+  void SetCodecVersion(int v) { this->codec_version_ = v; }
 
-  int GetCodecVersion() {
-    return this->codec_version_;
-  }
+  int GetCodecVersion() { return this->codec_version_; }
 
   void Init(int schema_version,
             std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,

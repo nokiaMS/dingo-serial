@@ -50,7 +50,7 @@ class DingoSchema<std::vector<std::string>> : public BaseSchema {
                                             std::vector<std::string>& data);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

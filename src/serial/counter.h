@@ -29,7 +29,9 @@ class Counter {
   Counter() { gettimeofday(&s_, nullptr); }
   void ReStart() { gettimeofday(&s_, nullptr); }
   void SaveCounter() { gettimeofday(&sc_, nullptr); }
-  int TimeElapsedBeforeLastSave() const { return (((sc_.tv_sec - s_.tv_sec) * 1000000) + (sc_.tv_usec - s_.tv_usec)); }
+  int TimeElapsedBeforeLastSave() const {
+    return (((sc_.tv_sec - s_.tv_sec) * 1000000) + (sc_.tv_usec - s_.tv_usec));
+  }
 
   int64_t TimeElapsed() const {
     timeval e;
@@ -49,7 +51,8 @@ class Counter {
     struct tm timeinfo;
     auto r = time(&rawtime);
     localtime_r(&rawtime, &timeinfo);
-    auto r1 = strftime(c, sizeof(c), "%c", &timeinfo);  // Replace asctime_r with strftime
+    auto r1 = strftime(c, sizeof(c), "%c",
+                       &timeinfo);  // Replace asctime_r with strftime
     return std::string(c);
   }
   virtual ~Counter() = default;
@@ -95,7 +98,8 @@ class Clock {
     }
   }
 
-  static struct timespec Diff(const struct timespec& start, const struct timespec& end) {
+  static struct timespec Diff(const struct timespec& start,
+                              const struct timespec& end) {
     struct timespec temp;
     if ((end.tv_nsec - start.tv_nsec) < 0) {
       temp.tv_sec = end.tv_sec - start.tv_sec - 1;

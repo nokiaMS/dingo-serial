@@ -34,14 +34,19 @@
 
 namespace dingodb {
 
-void SortSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
-void FormatSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, bool le);
-int* GetApproPerRecordSize(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
+void SortSchema(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
+void FormatSchema(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, bool le);
+int* GetApproPerRecordSize(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas);
 
 bool VectorFindAndRemove(std::vector<int>* v, int t);
 // bool VectorFind(const std::vector<int>& v, int t);
 // bool VectorFind(const std::vector<int>& v, int t, int n);
-inline bool VectorFind(const std::vector<int>& v, int t, int n) { return v[n] == t; }
+inline bool VectorFind(const std::vector<int>& v, int t, int n) {
+  return v[n] == t;
+}
 
 bool IsLE();
 

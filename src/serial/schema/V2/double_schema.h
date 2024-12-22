@@ -48,7 +48,7 @@ class DingoSchema<double> : public BaseSchema {
   double DecodeDoubleNotComparable(Buf& buf);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

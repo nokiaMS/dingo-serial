@@ -50,7 +50,7 @@ class DingoSchema<std::string> : public BaseSchema {
   static void DecodeBytesNotComparable(Buf& buf, std::string& data);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

@@ -30,9 +30,7 @@ class KeyValue {
   void SetKey(const std::string& key);
   void SetValue(const std::string& value);
 
-  int GetVersion() const {
-   return this->key_.at(key_.size() -1);
-  }
+  int GetVersion() const { return this->key_.at(key_.size() - 1); }
 
   const std::string& GetKey() const;
   const std::string& GetValue() const;
@@ -42,7 +40,7 @@ class KeyValue {
   std::string value_;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

@@ -17,4 +17,4 @@
 
 #include "utils/utils.h"
 
-#endif //DINGO_UTILS_WRAPPER_H_
+#endif  // DINGO_UTILS_WRAPPER_H_

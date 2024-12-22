@@ -15,8 +15,9 @@
 #ifndef DINGO_SERIAL_INTEGER_SCHEMA_V2_H_
 #define DINGO_SERIAL_INTEGER_SCHEMA_V2_H_
 
-#include "dingo_schema.h"
 #include <optional>
+
+#include "dingo_schema.h"
 
 namespace dingodb {
 namespace serialV2 {
@@ -49,7 +50,7 @@ class DingoSchema<int32_t> : public BaseSchema {
   int32_t DecodeIntNotComparable(Buf& buf);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

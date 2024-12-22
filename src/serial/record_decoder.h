@@ -18,25 +18,27 @@
 #include <memory>
 #include <string>
 
-#include "serial/record/record_decoder.h"
 #include "serial/record/V2/record_decoder.h"
+#include "serial/record/record_decoder.h"
 #include "serial/schema/base_schema.h"
-#include "utils/keyvalue.h"
 #include "utils/V2/keyvalue.h"
+#include "utils/keyvalue.h"
 
 namespace dingodb {
 
 class RecordDecoder {
  private:
   int codec_version_;
-  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas_v1_;
+  std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+      schemas_v1_;
   std::vector<serialV2::BaseSchemaPtr> schemas_v2_;
 
   dingodb::RecordDecoderV1* re_v1_;
   dingodb::serialV2::RecordDecoderV2* re_v2_;
 
   // converter from v2 schemas to v1 schemas.
-  //std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> ConvertSchemas2V1(
+  // std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>>
+  // ConvertSchemas2V1(
   //    const std::vector<V2::BaseSchemaPtr>& schemas);
 
  public:
@@ -52,10 +54,11 @@ class RecordDecoder {
 
   // constructors for v2.
   RecordDecoder(int schema_version,
-                const std::vector<serialV2::BaseSchemaPtr>& schemas, long common_id);
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id);
   RecordDecoder(int schema_version,
-                const std::vector<serialV2::BaseSchemaPtr>& schemas, long common_id,
-                bool le);
+                const std::vector<serialV2::BaseSchemaPtr>& schemas,
+                long common_id, bool le);
 
   ~RecordDecoder() {
     delete re_v1_;
@@ -68,22 +71,18 @@ class RecordDecoder {
     re_v1_->Init(schema_version, schemas, common_id);
   }
 
-
   // decode for v1.
-  int Decode(const KeyValue& key_value,
-             std::vector<std::any>& record) {
+  int Decode(const KeyValue& key_value, std::vector<std::any>& record) {
     return re_v1_->Decode(key_value, record);
   }
-
-
 
   // decode for v2.
   int Decode(const serialV2::KeyValue& key_value,
              std::vector<std::any>& record) {
     if (DINGO_UNLIKELY(key_value.GetVersion() == serialV2::CODEC_VERSION_V1)) {
-      // This code branch is inefficient, but factly the code will not run here except
-      // the scenario that we are running the new verison(v2) on old data(v1), so we just
-      // keep the code like this.
+      // This code branch is inefficient, but factly the code will not run here
+      // except the scenario that we are running the new verison(v2) on old
+      // data(v1), so we just keep the code like this.
       auto key_value_v1 =
           KeyValue(std::make_shared<std::string>(key_value.GetKey()),
                    std::make_shared<std::string>(key_value.GetValue()));
@@ -100,11 +99,10 @@ class RecordDecoder {
   }
    */
 
-
   int Decode(const std::string& key, const std::string& value,
              std::vector<std::any>& record) {
     auto key_len = key.size();
-    const char * p = key.data();
+    const char* p = key.data();
     char a = key.at(key_len - 1);
     if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
       return re_v1_->Decode(key, value, record);
@@ -120,9 +118,7 @@ class RecordDecoder {
   }
   */
 
-
-  int DecodeKey(const std::string& key,
-                std::vector<std::any>& record) {
+  int DecodeKey(const std::string& key, std::vector<std::any>& record) {
     if (key.at(key.size() - 1) == dingodb::serialV2::CODEC_VERSION_V1) {
       return re_v1_->DecodeKey(key, record);
     } else {
@@ -137,13 +133,11 @@ class RecordDecoder {
   }
   */
 
-
   // decode for v1.
   int Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
              std::vector<std::any>& record) {
     return re_v1_->Decode(key_value, column_indexes, record);
   }
-
 
   // decode for v2.
   int Decode(const serialV2::KeyValue& key_value,
@@ -151,7 +145,6 @@ class RecordDecoder {
              std::vector<std::any>& record /*output*/) {
     return re_v2_->Decode(key_value, column_indexes, record);
   }
-
 
   int Decode(const std::string& key, const std::string& value,
              const std::vector<int>& column_indexes,
@@ -173,7 +166,8 @@ class RecordDecoder {
 
   int GetCodecVersion(std::string& key) {
     if (key.empty()) {
-      throw std::runtime_error("key should not be empty in func GetCodecVersion.");
+      throw std::runtime_error(
+          "key should not be empty in func GetCodecVersion.");
     }
 
     return key.c_str()[key.length() - 1];

@@ -19,9 +19,8 @@
 #include <string>
 
 #include "any"
-#include "functional"         // IWYU pragma: keep
-#include "optional"           // IWYU pragma: keep
-#include "serial/utils/keyvalue.h"  // IWYU pragma: keep
+#include "functional"  // IWYU pragma: keep
+#include "optional"    // IWYU pragma: keep
 #include "serial/schema/boolean_list_schema.h"
 #include "serial/schema/boolean_schema.h"  // IWYU pragma: keep
 #include "serial/schema/double_list_schema.h"
@@ -34,7 +33,8 @@
 #include "serial/schema/long_schema.h"  // IWYU pragma: keep
 #include "serial/schema/string_list_schema.h"
 #include "serial/schema/string_schema.h"  // IWYU pragma: keep
-#include "serial/utils/utils.h"                 // IWYU pragma: keep
+#include "serial/utils/keyvalue.h"        // IWYU pragma: keep
+#include "serial/utils/utils.h"           // IWYU pragma: keep
 
 namespace dingodb {
 
@@ -53,20 +53,31 @@ class RecordEncoderV1 {
   bool le_;
 
  public:
-  RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordEncoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
-                bool le);
+  RecordEncoderV1(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id);
+  RecordEncoderV1(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id, bool le);
 
-  void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  void Init(int schema_version,
+            std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+            long common_id);
 
-  int Encode(char prefix, const std::vector<std::any>& record, std::string& key, std::string& value);
+  int Encode(char prefix, const std::vector<std::any>& record, std::string& key,
+             std::string& value);
 
-  int EncodeKey(char prefix, const std::vector<std::any>& record, std::string& output);
+  int EncodeKey(char prefix, const std::vector<std::any>& record,
+                std::string& output);
 
   int EncodeValue(const std::vector<std::any>& record, std::string& output);
 
-  int EncodeKeyPrefix(char prefix, const std::vector<std::any>& record, int column_count, std::string& output);
-  int EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys, std::string& output);
+  int EncodeKeyPrefix(char prefix, const std::vector<std::any>& record,
+                      int column_count, std::string& output);
+  int EncodeKeyPrefix(char prefix, const std::vector<std::string>& keys,
+                      std::string& output);
 
   int EncodeMaxKeyPrefix(char prefix, std::string& output) const;
 

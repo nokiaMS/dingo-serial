@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include <gtest/gtest.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -25,7 +25,7 @@
 
 #include "serial/utils/V2/buf.h"
 
-//using namespace dingodb::serialV2;
+// using namespace dingodb::serialV2;
 
 void Print(const unsigned char* addr, uint32_t size) {
   for (uint32_t i = 0; i < size; ++i) {
@@ -234,6 +234,3 @@ TEST_F(BufTest, StringTest) {
   ASSERT_EQ("abcde12345abcde12345", str);
   ASSERT_EQ(0, buf.Size());
 }
-
-
-

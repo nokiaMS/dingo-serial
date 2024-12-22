@@ -18,9 +18,9 @@
 #include <memory>
 #include <string>
 
+#include "../utils/keyvalue.h"
 #include "any"
 #include "functional"
-#include "../utils/keyvalue.h"
 #include "optional"
 #include "serial/schema/boolean_list_schema.h"
 #include "serial/schema/boolean_schema.h"
@@ -51,19 +51,30 @@ class RecordDecoderV1 {
   bool le_;
 
  public:
-  RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
-  RecordDecoderV1(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id,
-                bool le);
+  RecordDecoderV1(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id);
+  RecordDecoderV1(
+      int schema_version,
+      std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+      long common_id, bool le);
 
-  void Init(int schema_version, std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, long common_id);
+  void Init(int schema_version,
+            std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+            long common_id);
 
-  int Decode(const KeyValue& key_value, std::vector<std::any>& record /*output*/);
-  int Decode(const std::string& key, const std::string& value, std::vector<std::any>& record /*output*/);
-  int DecodeKey(const std::string& key, std::vector<std::any>& record /*output*/);
+  int Decode(const KeyValue& key_value,
+             std::vector<std::any>& record /*output*/);
+  int Decode(const std::string& key, const std::string& value,
+             std::vector<std::any>& record /*output*/);
+  int DecodeKey(const std::string& key,
+                std::vector<std::any>& record /*output*/);
 
   int Decode(const KeyValue& key_value, const std::vector<int>& column_indexes,
              std::vector<std::any>& record /*output*/);
-  int Decode(const std::string& key, const std::string& value, const std::vector<int>& column_indexes,
+  int Decode(const std::string& key, const std::string& value,
+             const std::vector<int>& column_indexes,
              std::vector<std::any>& record /*output*/);
   int GetCodecVersion(Buf& buf);
 };

@@ -44,7 +44,7 @@ class DingoSchema<std::vector<bool>> : public BaseSchema {
   std::any DecodeValue(Buf& buf) override;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

@@ -76,7 +76,7 @@ class RecordDecoderV2 {
   std::vector<BaseSchemaPtr> schemas_;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

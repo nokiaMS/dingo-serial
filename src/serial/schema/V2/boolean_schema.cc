@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "boolean_schema.h"
+
 #include <any>
 #include <stdexcept>
 
-#include "boolean_schema.h"
 #include "serial/utils/V2/compiler.h"
 
 namespace dingodb {
@@ -44,10 +45,9 @@ constexpr int kDataLength = 1;
 constexpr int kDataLengthWithNull = kDataLength + 1;
 
 inline int DingoSchema<bool>::GetLengthForKey() {
-  if(AllowNull()) {
+  if (AllowNull()) {
     return kDataLengthWithNull;
-  }
-  else {
+  } else {
     return kDataLength;
   }
 }
@@ -94,7 +94,7 @@ int DingoSchema<bool>::EncodeKey(const std::any& data, Buf& buf) {
     throw std::runtime_error("Not allow null, but data not has value.");
   }
 
-  if(AllowNull()) {
+  if (AllowNull()) {
     if (data.has_value()) {
       buf.Write(k_not_null);
       const auto& ref_data = std::any_cast<const bool&>(data);
@@ -105,8 +105,7 @@ int DingoSchema<bool>::EncodeKey(const std::any& data, Buf& buf) {
     }
 
     return kDataLengthWithNull;
-  }
-  else {
+  } else {
     const auto& ref_data = std::any_cast<const bool&>(data);
     buf.Write(ref_data ? 0x1 : 0x0);
 
@@ -119,7 +118,7 @@ int DingoSchema<bool>::EncodeValue(const std::any& data, Buf& buf) {
 }
 
 std::any DingoSchema<bool>::DecodeKey(Buf& buf) {
-  if(AllowNull()) {
+  if (AllowNull()) {
     if (buf.Read() == k_null) {
       buf.Skip(kDataLength);  // The null flag has already been read.
       return std::any();
@@ -133,5 +132,5 @@ std::any DingoSchema<bool>::DecodeValue(Buf& buf) {
   return std::any(static_cast<bool>(buf.Read()));
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

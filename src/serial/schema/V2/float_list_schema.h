@@ -48,7 +48,7 @@ class DingoSchema<std::vector<float>> : public BaseSchema {
   void DecodeFloatList(Buf& buf, std::vector<float>& data);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

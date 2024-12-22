@@ -134,7 +134,7 @@ class Buf {
   std::string buf_;
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

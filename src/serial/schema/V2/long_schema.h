@@ -48,7 +48,7 @@ class DingoSchema<int64_t> : public BaseSchema {
   int64_t DecodeLongNotComparable(Buf& buf);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

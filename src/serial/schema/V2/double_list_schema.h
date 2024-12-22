@@ -48,7 +48,7 @@ class DingoSchema<std::vector<double>> : public BaseSchema {
   void DecodeDoubleList(Buf& buf, std::vector<double>& data);
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

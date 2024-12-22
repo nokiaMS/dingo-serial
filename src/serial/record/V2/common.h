@@ -52,7 +52,7 @@ inline void GetOffsetUnit(Buf& buf, int& pos, int& offset_unit) {
   pos -= 1;
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif  // DINGO_COMMON_H_

@@ -18,8 +18,8 @@
 #include <memory>
 
 #include "base_schema.h"
-#include "serial/utils/V2/buf.h"
 #include "serial/schema/dingo_schema.h"
+#include "serial/utils/V2/buf.h"
 
 namespace dingodb {
 namespace serialV2 {
@@ -39,7 +39,7 @@ class DingoSchema : public BaseSchema {
   std::any DecodeValue(Buf& buf /*NOLINT*/) override { return std::any(); }
 };
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif

@@ -126,5 +126,5 @@ std::any DingoSchema<std::vector<int32_t>>::DecodeValue(Buf& buf) {
   return std::move(std::any(std::move(data)));
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

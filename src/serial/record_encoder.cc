@@ -15,9 +15,9 @@
 
 #include <vector>
 
-#include "serial/record/record_encoder.h"
 #include "serial/record/V2/common.h"
 #include "serial/record/V2/record_encoder.h"
+#include "serial/record/record_encoder.h"
 #include "serial/utils/V2/schema_converter.h"
 
 namespace dingodb {
@@ -30,7 +30,8 @@ RecordEncoder::RecordEncoder(
   schemas_v1_ = schemas;
   schemas_v2_ = ConvertSchemasV2(schemas);
   this->re_v1_ = new RecordEncoderV1(schema_version, schemas, common_id);
-  this->re_v2_ = new serialV2::RecordEncoderV2(schema_version, schemas_v2_, common_id);
+  this->re_v2_ =
+      new serialV2::RecordEncoderV2(schema_version, schemas_v2_, common_id);
 }
 
 RecordEncoder::RecordEncoder(
@@ -41,26 +42,30 @@ RecordEncoder::RecordEncoder(
   schemas_v1_ = schemas;
   schemas_v2_ = ConvertSchemasV2(schemas);
   this->re_v1_ = new RecordEncoderV1(schema_version, schemas, common_id, le);
-  this->re_v2_ = new serialV2::RecordEncoderV2(schema_version, schemas_v2_, common_id, le);
+  this->re_v2_ =
+      new serialV2::RecordEncoderV2(schema_version, schemas_v2_, common_id, le);
 }
 
-RecordEncoder::RecordEncoder(int schema_version,
-                             const std::vector<serialV2::BaseSchemaPtr>& schemas,
-                             long common_id) {
+RecordEncoder::RecordEncoder(
+    int schema_version, const std::vector<serialV2::BaseSchemaPtr>& schemas,
+    long common_id) {
   this->codec_version_ = serialV2::CODEC_VERSION_V2;
   this->schemas_v1_ = ConvertSchemasV1(schemas);
   this->schemas_v2_ = schemas;
   this->re_v1_ = new RecordEncoderV1(schema_version, schemas_v1_, common_id);
-  this->re_v2_ = new serialV2::RecordEncoderV2(schema_version, schemas, common_id);
+  this->re_v2_ =
+      new serialV2::RecordEncoderV2(schema_version, schemas, common_id);
 }
-RecordEncoder::RecordEncoder(int schema_version,
-                             const std::vector<serialV2::BaseSchemaPtr>& schemas,
-                             long common_id, bool le) {
+RecordEncoder::RecordEncoder(
+    int schema_version, const std::vector<serialV2::BaseSchemaPtr>& schemas,
+    long common_id, bool le) {
   this->codec_version_ = serialV2::CODEC_VERSION_V2;
   this->schemas_v1_ = ConvertSchemasV1(schemas);
   this->schemas_v2_ = schemas;
-  this->re_v1_ = new RecordEncoderV1(schema_version, schemas_v1_, common_id, le);
-  this->re_v2_ = new serialV2::RecordEncoderV2(schema_version, schemas, common_id, le);
+  this->re_v1_ =
+      new RecordEncoderV1(schema_version, schemas_v1_, common_id, le);
+  this->re_v2_ =
+      new serialV2::RecordEncoderV2(schema_version, schemas, common_id, le);
 }
 
 inline void RecordEncoder::Init(

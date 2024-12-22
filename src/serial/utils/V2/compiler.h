@@ -35,7 +35,7 @@ namespace serialV2 {
 #define DINGO_UNLIKELY(expr) (expr)
 #endif
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
 
 #endif  // DINGO_SERIAL_COMPILER_H_

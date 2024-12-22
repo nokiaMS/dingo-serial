@@ -139,5 +139,5 @@ std::any DingoSchema<std::vector<float>>::DecodeValue(Buf& buf) {
   return std::move(std::any(std::move(data)));
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

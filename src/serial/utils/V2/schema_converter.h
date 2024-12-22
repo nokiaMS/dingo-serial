@@ -23,11 +23,12 @@
 namespace dingodb {
 
 std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> ConvertSchemasV1(
-  const std::vector<serialV2::BaseSchemaPtr>& schemas);
+    const std::vector<serialV2::BaseSchemaPtr>& schemas);
 
 std::vector<serialV2::BaseSchemaPtr> ConvertSchemasV2(
-    const std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas);
+    const std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+        schemas);
 
-}
+}  // namespace dingodb
 
 #endif

@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <gtest/gtest.h>
-#include <serial/utils/utils.h>
 #include <serial/utils/V2/utils.h>
+#include <serial/utils/utils.h>
 
 #include <iostream>
 #include <string>
 
 class BufferTest : public testing::Test {};
 
-std::any func_a() {
-  return std::any();
-}
+std::any func_a() { return std::any(); }
 
 TEST_F(BufferTest, utilsV2) {
   {

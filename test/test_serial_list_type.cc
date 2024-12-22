@@ -217,7 +217,8 @@ class DingoSerialListTypeTest : public testing::Test {
     optional<int64_t> score = 214748364700L;
     std::shared_ptr<std::string> addr = std::make_shared<std::string>(
         "test address test 中文 表情😊🏷️👌 test "
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试"
+        "测"
         "试"
         "测"
         "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫");
@@ -266,7 +267,8 @@ class DingoSerialListTypeTest : public testing::Test {
 
     optional<std::shared_ptr<std::vector<std::string>>> string3 =
         std::make_shared<std::vector<std::string>>(std::vector<std::string>{
-            "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试测"
+            "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试"
+            "测"
             "试",
             "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫"});
     optional<std::shared_ptr<std::vector<std::string>>> string4 =

@@ -27,14 +27,14 @@ class KeyValue {
 
  public:
   KeyValue();
-  KeyValue(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
+  KeyValue(std::shared_ptr<std::string> key,
+           std::shared_ptr<std::string> value);
   ~KeyValue() = default;
-  void Set(std::shared_ptr<std::string> key, std::shared_ptr<std::string> value);
+  void Set(std::shared_ptr<std::string> key,
+           std::shared_ptr<std::string> value);
   void SetKey(std::shared_ptr<std::string> key);
   void SetValue(std::shared_ptr<std::string> value);
-  int GetVersion() const {
-   return this->key_->at(key_->size() -1);
-  }
+  int GetVersion() const { return this->key_->at(key_->size() - 1); }
   std::shared_ptr<std::string> GetKey() const;
   std::shared_ptr<std::string> GetValue() const;
 };

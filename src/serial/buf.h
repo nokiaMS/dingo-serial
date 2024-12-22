@@ -17,4 +17,4 @@
 
 #include "utils/buf.h"
 
-#endif //DINGO_BUF_WRAPPER_H_
+#endif  // DINGO_BUF_WRAPPER_H_

@@ -27,7 +27,8 @@ namespace dingodb {
 
 template <>
 
-class DingoSchema<std::optional<std::shared_ptr<std::vector<float>>>> : public BaseSchema {
+class DingoSchema<std::optional<std::shared_ptr<std::vector<float>>>>
+    : public BaseSchema {
  private:
   int index_;
   bool key_, allow_null_;
@@ -48,12 +49,15 @@ class DingoSchema<std::optional<std::shared_ptr<std::vector<float>>>> : public B
   void SetIsKey(bool key);
   void SetAllowNull(bool allow_null);
   void SetIsLe(bool le);
-  static void EncodeKey(Buf* buf, std::optional<std::shared_ptr<std::vector<float>>> data);
-  static void EncodeKeyPrefix(Buf* buf, std::optional<std::shared_ptr<std::vector<float>>> data);
+  static void EncodeKey(
+      Buf* buf, std::optional<std::shared_ptr<std::vector<float>>> data);
+  static void EncodeKeyPrefix(
+      Buf* buf, std::optional<std::shared_ptr<std::vector<float>>> data);
   static std::optional<std::shared_ptr<std::vector<float>>> DecodeKey(Buf* buf);
   static void SkipKey(Buf* buf);
   float InternalDecodeData(Buf* buf) const;
-  void EncodeValue(Buf* buf, std::optional<std::shared_ptr<std::vector<float>>> data);
+  void EncodeValue(Buf* buf,
+                   std::optional<std::shared_ptr<std::vector<float>>> data);
   std::optional<std::shared_ptr<std::vector<float>>> DecodeValue(Buf* buf);
   void SkipValue(Buf* buf);
 };

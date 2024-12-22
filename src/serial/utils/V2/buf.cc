@@ -391,5 +391,5 @@ void Buf::GetString(std::string& s) { s.swap(buf_); }
 
 void Buf::GetString(std::string* s) { s->swap(buf_); }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

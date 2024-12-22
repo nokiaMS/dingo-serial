@@ -15,9 +15,8 @@
 #include <optional>
 #include <string>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/record_decoder.h"
-#include "serial/schema/base_schema.h"
+#include "serial/schema/V2/base_schema.h"
 #include "serial/schema/V2/boolean_list_schema.h"
 #include "serial/schema/V2/boolean_schema.h"
 #include "serial/schema/V2/dingo_schema.h"
@@ -31,7 +30,7 @@
 #include "serial/schema/V2/long_schema.h"
 #include "serial/schema/V2/string_list_schema.h"
 #include "serial/schema/V2/string_schema.h"
-
+#include "serial/schema/base_schema.h"
 
 namespace dingodb {
 
@@ -146,7 +145,8 @@ std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> ConvertSchemasV1(
         break;
       }
       case BaseSchema::kString: {
-        auto item_v1 = std::make_shared<DingoSchema<std::optional<std::shared_ptr<std::string>>>>();
+        auto item_v1 = std::make_shared<
+            DingoSchema<std::optional<std::shared_ptr<std::string>>>>();
         item_v1->SetIndex(item->GetIndex());
         item_v1->SetAllowNull(item->AllowNull());
         item_v1->SetIsKey(item->IsKey());
@@ -258,7 +258,8 @@ std::vector<serialV2::BaseSchemaPtr> ConvertSchemasV2(
         break;
       }
       case BaseSchema::kBoolList: {
-        auto item_v2 = std::make_shared<serialV2::DingoSchema<std::vector<bool>>>();
+        auto item_v2 =
+            std::make_shared<serialV2::DingoSchema<std::vector<bool>>>();
         FillSchemaV2(item_v2, item);
         schemas_v2.push_back(item_v2);
         break;
@@ -278,13 +279,15 @@ std::vector<serialV2::BaseSchemaPtr> ConvertSchemasV2(
         break;
       }
       case BaseSchema::kFloatList: {
-        auto item_v2 = std::make_shared<serialV2::DingoSchema<std::vector<float>>>();
+        auto item_v2 =
+            std::make_shared<serialV2::DingoSchema<std::vector<float>>>();
         FillSchemaV2(item_v2, item);
         schemas_v2.push_back(item_v2);
         break;
       }
       case BaseSchema::kDoubleList: {
-        auto item_v2 = std::make_shared<serialV2::DingoSchema<std::vector<double>>>();
+        auto item_v2 =
+            std::make_shared<serialV2::DingoSchema<std::vector<double>>>();
         FillSchemaV2(item_v2, item);
         schemas_v2.push_back(item_v2);
         break;
@@ -308,4 +311,4 @@ std::vector<serialV2::BaseSchemaPtr> ConvertSchemasV2(
   return std::move(schemas_v2);
 }
 
-}
+}  // namespace dingodb

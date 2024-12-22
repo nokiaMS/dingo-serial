@@ -26,9 +26,9 @@
 #include <string>
 #include <vector>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
+#include "serial/schema/V2/base_schema.h"
 #include "serial/utils/V2/utils.h"
 
 using namespace dingodb::serialV2;
@@ -198,7 +198,8 @@ class DingoSerialListTypeTest : public testing::Test {
     int64_t score = 214748364700L;
     std::string addr =
         "test address test 中文 表情😊🏷️👌 test "
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测"
+        "试"
         "测"
         "试"
         "测"
@@ -230,7 +231,8 @@ class DingoSerialListTypeTest : public testing::Test {
                                   2469999883732l};
 
     std::vector<std::string> string3 = {
-        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测试"
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️🙌测"
+        "试"
         "测"
         "试",
         "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫"};

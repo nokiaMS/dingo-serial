@@ -29,14 +29,14 @@
 #include <utility>
 #include <vector>
 
-#include "serial/schema/V2/base_schema.h"
 #include "serial/record/V2/common.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
 #include "serial/record_decoder.h"
 #include "serial/record_encoder.h"
+#include "serial/schema/V2/base_schema.h"
 
-//using namespace dingodb::serialV2;
+// using namespace dingodb::serialV2;
 
 const char kAlphabet[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
                           'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
@@ -157,7 +157,8 @@ std::vector<dingodb::serialV2::BaseSchemaPtr> GenerateSchemas1Column() {
   return schemas;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchemasV1() {
+std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>>
+GenerateSchemasV1() {
   std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> schemas =
       std::make_shared<std::vector<std::shared_ptr<dingodb::BaseSchema>>>(11);
 
@@ -207,7 +208,8 @@ std::shared_ptr<std::vector<std::shared_ptr<dingodb::BaseSchema>>> GenerateSchem
   pic->SetIsKey(false);
   schemas->at(6) = pic;
 
-  auto test_null = std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
+  auto test_null =
+      std::make_shared<dingodb::DingoSchema<std::optional<int32_t>>>();
   test_null->SetIndex(7);
   test_null->SetAllowNull(true);
   test_null->SetIsKey(false);
@@ -240,9 +242,9 @@ std::vector<std::any> GenerateRecord(int32_t id) {
 
   std::string name = GenRandomString(128);
   std::string gender = GenRandomString(32);
-  //int64_t score = 214748364700L;
+  // int64_t score = 214748364700L;
   int64_t score = 1004;
-  //std::string addr = GenRandomString(256);
+  // std::string addr = GenRandomString(256);
   std::string addr = "";
   bool exist = false;
 
@@ -269,7 +271,6 @@ std::vector<std::any> GenerateRecord1Column() {
 
   std::string name = "abcd";
 
-
   record.at(0) = name;
   record.at(1) = std::any();
 
@@ -281,7 +282,7 @@ std::vector<std::any> GenerateRecordV1(int32_t id) {
   record.resize(11);
 
   std::string name = GenRandomString(128);
-  //std::string name = "1234567890abcde";
+  // std::string name = "1234567890abcde";
   std::string gender = GenRandomString(32);
   int64_t score = 214748364700L;
   std::string addr = GenRandomString(256);
@@ -296,12 +297,12 @@ std::vector<std::any> GenerateRecordV1(int32_t id) {
 
   record.at(0) = std::optional<int32_t>(id);
   record.at(1) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(name)};
+      std::make_shared<std::string>(name)};
   record.at(2) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(gender)};
+      std::make_shared<std::string>(gender)};
   record.at(3) = std::optional<int64_t>(score);
   record.at(4) = std::optional<std::shared_ptr<std::string>>{
-    std::make_shared<std::string>(addr)};
+      std::make_shared<std::string>(addr)};
   record.at(5) = std::optional<bool>(exist);
   record.at(6) = pic;
   record.at(7) = test_null;
@@ -369,59 +370,58 @@ TEST_F(PerformanceTestV2, wrapperPerf_eq) {
   std::vector<std::any> decode_record;
   decoder.Decode(std::move(key), std::move(value), decode_record);
 
-  //id.
+  // id.
   auto id1 = std::any_cast<int32_t>(record.at(0));
   auto id2 = std::any_cast<int32_t>(decode_record.at(0));
   EXPECT_EQ(id1, id2);
-  //name.
+  // name.
   auto name1 = std::any_cast<std::string>(record.at(1));
   auto name2 = std::any_cast<std::string>(decode_record.at(1));
   EXPECT_EQ(name1, name2);
 
-  //gender.
+  // gender.
   auto gender1 = std::any_cast<std::string>(record.at(2));
   auto gender2 = std::any_cast<std::string>(decode_record.at(2));
   EXPECT_EQ(gender1, gender2);
 
-  //score.
+  // score.
   auto score1 = std::any_cast<int64_t>(record.at(3));
   auto score2 = std::any_cast<int64_t>(decode_record.at(3));
   EXPECT_EQ(score1, score2);
 
-  //addr
+  // addr
   auto addr1 = std::any_cast<std::string>(record.at(4));
   auto addr2 = std::any_cast<std::string>(decode_record.at(4));
   EXPECT_EQ(addr1, addr2);
 
-  //exist.
+  // exist.
   auto exist1 = std::any_cast<bool>(record.at(5));
   auto exist2 = std::any_cast<bool>(decode_record.at(5));
   EXPECT_EQ(exist1, exist2);
 
-  //pic
+  // pic
   auto pic1 = record.at(6).has_value();
   auto pic2 = decode_record.at(6).has_value();
   EXPECT_EQ(pic1, pic2);
   EXPECT_EQ(pic1, false);
 
-
-  //test_null.
+  // test_null.
   auto test_null1 = record.at(7).has_value();
   auto test_null2 = decode_record.at(7).has_value();
   EXPECT_EQ(test_null1, test_null2);
   EXPECT_EQ(test_null1, false);
 
-  //age
+  // age
   auto age1 = std::any_cast<int32_t>(record.at(8));
   auto age2 = std::any_cast<int32_t>(decode_record.at(8));
   EXPECT_EQ(age1, age2);
 
-  //prev
+  // prev
   auto prev1 = std::any_cast<int64_t>(record.at(9));
   auto prev2 = std::any_cast<int64_t>(decode_record.at(9));
   EXPECT_EQ(prev1, prev2);
 
-  //double
+  // double
   auto double1 = std::any_cast<double>(record.at(10));
   auto double2 = std::any_cast<double>(record.at(10));
   EXPECT_EQ(double1, double2);
@@ -441,59 +441,75 @@ TEST_F(PerformanceTestV2, wrapperPerf_eq) {
 
   //id.
   auto id3 = std::any_cast<std::optional<int32_t>>(record_v1.at(0)).value();
-  auto id4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(0)).value();
+  auto id4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(0)).value();
   EXPECT_EQ(id3, id4);
 
   //name.
-  auto name3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(1)).value());
-  auto name4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(1)).value());
+  auto name3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(1)).value());
+  auto name4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(1)).value());
   EXPECT_EQ(name3, name4);
 
   //gender.
-  auto gender3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(2)).value());
-  auto gender4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(2)).value());
+  auto gender3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(2)).value());
+  auto gender4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(2)).value());
   EXPECT_EQ(gender3, gender4);
 
   //score.
   auto score3 = std::any_cast<std::optional<int64_t>>(record_v1.at(3)).value();
-  auto score4 = std::any_cast<std::optional<int64_t>>(decode_record_v1.at(3)).value();
+  auto score4 =
+  std::any_cast<std::optional<int64_t>>(decode_record_v1.at(3)).value();
   EXPECT_EQ(score3, score4);
 
   //addr
-  auto addr3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(4)).value());
-  auto addr4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(4)).value());
+  auto addr3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(4)).value());
+  auto addr4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(4)).value());
   EXPECT_EQ(addr3, addr4);
 
   //exist.
   auto exist3 = std::any_cast<std::optional<bool>>(record_v1.at(5)).value();
-  auto exist4 = std::any_cast<std::optional<bool>>(decode_record_v1.at(5)).value();
+  auto exist4 =
+  std::any_cast<std::optional<bool>>(decode_record_v1.at(5)).value();
   EXPECT_EQ(exist3, exist4);
 
   //pic
-  auto pic3 = std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(6)).has_value();
-  auto pic4 = std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(6)).has_value();
+  auto pic3 =
+  std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(6)).has_value();
+  auto pic4 =
+  std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(6)).has_value();
   EXPECT_EQ(pic3, pic4);
   EXPECT_EQ(pic3, false);
 
   //test_null.
-  auto test_null3 = std::any_cast<std::optional<int32_t>>(record_v1.at(7)).has_value();
-  auto test_null4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(7)).has_value();
+  auto test_null3 =
+  std::any_cast<std::optional<int32_t>>(record_v1.at(7)).has_value(); auto
+  test_null4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(7)).has_value();
   EXPECT_EQ(test_null3, test_null4);
   EXPECT_EQ(pic3, false);
 
   //age
   auto age3 = std::any_cast<std::optional<int32_t>>(record_v1.at(8)).value();
-  auto age4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(8)).value();
+  auto age4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(8)).value();
   EXPECT_EQ(age3, age4);
 
   //prev
   auto prev3 = std::any_cast<std::optional<int64_t>>(record_v1.at(9)).value();
-  auto prev4 = std::any_cast<std::optional<int64_t>>(decode_record_v1.at(9)).value();
+  auto prev4 =
+  std::any_cast<std::optional<int64_t>>(decode_record_v1.at(9)).value();
   EXPECT_EQ(prev3, prev4);
 
   //double
   auto double3 = std::any_cast<std::optional<double>>(record_v1.at(10)).value();
-  auto double4 = std::any_cast<std::optional<double>>(decode_record_v1.at(10)).value();
+  auto double4 =
+  std::any_cast<std::optional<double>>(decode_record_v1.at(10)).value();
   EXPECT_EQ(double3, double4);
   */
 }
@@ -506,7 +522,7 @@ TEST_F(PerformanceTestV2, wrapperPerf_value_only_1_column_and_is_null) {
   auto schemas = GenerateSchemas1Column();
 
   dingodb::RecordEncoder encoder(1, schemas, 100);
-  //encoder.SetCodecVersion(0x02);
+  // encoder.SetCodecVersion(0x02);
 
   dingodb::RecordDecoder decoder(1, schemas, 100);
 
@@ -519,14 +535,17 @@ TEST_F(PerformanceTestV2, wrapperPerf_value_only_1_column_and_is_null) {
   decoder.Decode(std::move(key), std::move(value), decode_record);
   EXPECT_EQ(decoder.GetCodecVersion(key), 0X02);
 
-  //name.
+  // name.
   auto name1 = std::any_cast<std::string>(record.at(0));
   auto name2 = std::any_cast<std::string>(decode_record.at(0));
   EXPECT_EQ(name1, name2);
 
-  //id.
-  auto id1 = (record.at(1).has_value()) ? std::any_cast<int32_t>(record.at(1)) : std::any();
-  auto id2 = (record.at(1).has_value()) ? std::any_cast<int32_t>(decode_record.at(1)) : std::any();
+  // id.
+  auto id1 = (record.at(1).has_value()) ? std::any_cast<int32_t>(record.at(1))
+                                        : std::any();
+  auto id2 = (record.at(1).has_value())
+                 ? std::any_cast<int32_t>(decode_record.at(1))
+                 : std::any();
   EXPECT_EQ(id1.has_value(), false);
   EXPECT_EQ(id2.has_value(), false);
 }
@@ -539,7 +558,7 @@ TEST_F(PerformanceTestV2, wrapperPerf_v1_schemas_to_v2_schemas) {
   auto schemas = GenerateSchemasV1();
 
   dingodb::RecordEncoder encoder(1, schemas, 100);
-  //encoder.SetCodecVersion(0x02);
+  // encoder.SetCodecVersion(0x02);
 
   dingodb::RecordDecoder decoder(1, schemas, 100);
 
@@ -552,59 +571,58 @@ TEST_F(PerformanceTestV2, wrapperPerf_v1_schemas_to_v2_schemas) {
   decoder.Decode(std::move(key), std::move(value), decode_record);
   EXPECT_EQ(decoder.GetCodecVersion(key), 0X02);
 
-  //id.
+  // id.
   auto id1 = std::any_cast<int32_t>(record.at(0));
   auto id2 = std::any_cast<int32_t>(decode_record.at(0));
   EXPECT_EQ(id1, id2);
-  //name.
+  // name.
   auto name1 = std::any_cast<std::string>(record.at(1));
   auto name2 = std::any_cast<std::string>(decode_record.at(1));
   EXPECT_EQ(name1, name2);
 
-  //gender.
+  // gender.
   auto gender1 = std::any_cast<std::string>(record.at(2));
   auto gender2 = std::any_cast<std::string>(decode_record.at(2));
   EXPECT_EQ(gender1, gender2);
 
-  //score.
+  // score.
   auto score1 = std::any_cast<int64_t>(record.at(3));
   auto score2 = std::any_cast<int64_t>(decode_record.at(3));
   EXPECT_EQ(score1, score2);
 
-  //addr
+  // addr
   auto addr1 = std::any_cast<std::string>(record.at(4));
   auto addr2 = std::any_cast<std::string>(decode_record.at(4));
   EXPECT_EQ(addr1, addr2);
 
-  //exist.
+  // exist.
   auto exist1 = std::any_cast<bool>(record.at(5));
   auto exist2 = std::any_cast<bool>(decode_record.at(5));
   EXPECT_EQ(exist1, exist2);
 
-  //pic
+  // pic
   auto pic1 = record.at(6).has_value();
   auto pic2 = decode_record.at(6).has_value();
   EXPECT_EQ(pic1, pic2);
   EXPECT_EQ(pic1, false);
 
-
-  //test_null.
+  // test_null.
   auto test_null1 = record.at(7).has_value();
   auto test_null2 = decode_record.at(7).has_value();
   EXPECT_EQ(test_null1, test_null2);
   EXPECT_EQ(test_null1, false);
 
-  //age
+  // age
   auto age1 = std::any_cast<int32_t>(record.at(8));
   auto age2 = std::any_cast<int32_t>(decode_record.at(8));
   EXPECT_EQ(age1, age2);
 
-  //prev
+  // prev
   auto prev1 = std::any_cast<int64_t>(record.at(9));
   auto prev2 = std::any_cast<int64_t>(decode_record.at(9));
   EXPECT_EQ(prev1, prev2);
 
-  //double
+  // double
   auto double1 = std::any_cast<double>(record.at(10));
   auto double2 = std::any_cast<double>(record.at(10));
   EXPECT_EQ(double1, double2);
@@ -625,59 +643,75 @@ TEST_F(PerformanceTestV2, wrapperPerf_v1_schemas_to_v2_schemas) {
 
   //id.
   auto id3 = std::any_cast<std::optional<int32_t>>(record_v1.at(0)).value();
-  auto id4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(0)).value();
+  auto id4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(0)).value();
   EXPECT_EQ(id3, id4);
 
   //name.
-  auto name3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(1)).value());
-  auto name4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(1)).value());
+  auto name3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(1)).value());
+  auto name4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(1)).value());
   EXPECT_EQ(name3, name4);
 
   //gender.
-  auto gender3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(2)).value());
-  auto gender4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(2)).value());
+  auto gender3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(2)).value());
+  auto gender4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(2)).value());
   EXPECT_EQ(gender3, gender4);
 
   //score.
   auto score3 = std::any_cast<std::optional<int64_t>>(record_v1.at(3)).value();
-  auto score4 = std::any_cast<std::optional<int64_t>>(decode_record_v1.at(3)).value();
+  auto score4 =
+  std::any_cast<std::optional<int64_t>>(decode_record_v1.at(3)).value();
   EXPECT_EQ(score3, score4);
 
   //addr
-  auto addr3 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(4)).value());
-  auto addr4 = *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(4)).value());
+  auto addr3 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(4)).value());
+  auto addr4 =
+  *(std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(4)).value());
   EXPECT_EQ(addr3, addr4);
 
   //exist.
   auto exist3 = std::any_cast<std::optional<bool>>(record_v1.at(5)).value();
-  auto exist4 = std::any_cast<std::optional<bool>>(decode_record_v1.at(5)).value();
+  auto exist4 =
+  std::any_cast<std::optional<bool>>(decode_record_v1.at(5)).value();
   EXPECT_EQ(exist3, exist4);
 
   //pic
-  auto pic3 = std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(6)).has_value();
-  auto pic4 = std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(6)).has_value();
+  auto pic3 =
+  std::any_cast<std::optional<std::shared_ptr<std::string>>>(record_v1.at(6)).has_value();
+  auto pic4 =
+  std::any_cast<std::optional<std::shared_ptr<std::string>>>(decode_record_v1.at(6)).has_value();
   EXPECT_EQ(pic3, pic4);
   EXPECT_EQ(pic3, false);
 
   //test_null.
-  auto test_null3 = std::any_cast<std::optional<int32_t>>(record_v1.at(7)).has_value();
-  auto test_null4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(7)).has_value();
+  auto test_null3 =
+  std::any_cast<std::optional<int32_t>>(record_v1.at(7)).has_value(); auto
+  test_null4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(7)).has_value();
   EXPECT_EQ(test_null3, test_null4);
   EXPECT_EQ(pic3, false);
 
   //age
   auto age3 = std::any_cast<std::optional<int32_t>>(record_v1.at(8)).value();
-  auto age4 = std::any_cast<std::optional<int32_t>>(decode_record_v1.at(8)).value();
+  auto age4 =
+  std::any_cast<std::optional<int32_t>>(decode_record_v1.at(8)).value();
   EXPECT_EQ(age3, age4);
 
   //prev
   auto prev3 = std::any_cast<std::optional<int64_t>>(record_v1.at(9)).value();
-  auto prev4 = std::any_cast<std::optional<int64_t>>(decode_record_v1.at(9)).value();
+  auto prev4 =
+  std::any_cast<std::optional<int64_t>>(decode_record_v1.at(9)).value();
   EXPECT_EQ(prev3, prev4);
 
   //double
   auto double3 = std::any_cast<std::optional<double>>(record_v1.at(10)).value();
-  auto double4 = std::any_cast<std::optional<double>>(decode_record_v1.at(10)).value();
+  auto double4 =
+  std::any_cast<std::optional<double>>(decode_record_v1.at(10)).value();
   EXPECT_EQ(double3, double4);
   */
 }

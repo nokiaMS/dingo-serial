@@ -85,5 +85,5 @@ double StringToDouble(const std::string& str) {
   return std::strtod(str.c_str(), nullptr);
 }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb

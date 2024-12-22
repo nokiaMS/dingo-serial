@@ -22,7 +22,8 @@
 
 namespace dingodb {
 
-void SortSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas) {
+void SortSchema(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas) {
   int flag = 1;
   for (unsigned long i = 0; i < schemas->size() - flag; i++) {
     auto bs = schemas->at(i);
@@ -44,38 +45,49 @@ void SortSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schema
   }
 }
 
-void FormatSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas, bool le) {
+void FormatSchema(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas,
+    bool le) {
   for (auto& bs : *schemas) {
     if (bs != nullptr) {
       BaseSchema::Type type = bs->GetType();
       switch (type) {
         case BaseSchema::kInteger: {
-          auto is = std::dynamic_pointer_cast<DingoSchema<std::optional<int32_t>>>(bs);
+          auto is =
+              std::dynamic_pointer_cast<DingoSchema<std::optional<int32_t>>>(
+                  bs);
           is->SetIsLe(le);
           break;
         }
         case BaseSchema::kLong: {
-          auto ls = std::dynamic_pointer_cast<DingoSchema<std::optional<int64_t>>>(bs);
+          auto ls =
+              std::dynamic_pointer_cast<DingoSchema<std::optional<int64_t>>>(
+                  bs);
           ls->SetIsLe(le);
           break;
         }
         case BaseSchema::kDouble: {
-          auto ds = std::dynamic_pointer_cast<DingoSchema<std::optional<double>>>(bs);
+          auto ds =
+              std::dynamic_pointer_cast<DingoSchema<std::optional<double>>>(bs);
           ds->SetIsLe(le);
           break;
         }
         case BaseSchema::kIntegerList: {
-          auto ds = std::dynamic_pointer_cast<DingoSchema<std::optional<std::shared_ptr<std::vector<int32_t>>>>>(bs);
+          auto ds = std::dynamic_pointer_cast<DingoSchema<
+              std::optional<std::shared_ptr<std::vector<int32_t>>>>>(bs);
           ds->SetIsLe(le);
           break;
         }
         case BaseSchema::kLongList: {
-          auto ds = std::dynamic_pointer_cast<DingoSchema<std::optional<std::shared_ptr<std::vector<int64_t>>>>>(bs);
+          auto ds = std::dynamic_pointer_cast<DingoSchema<
+              std::optional<std::shared_ptr<std::vector<int64_t>>>>>(bs);
           ds->SetIsLe(le);
           break;
         }
         case BaseSchema::kDoubleList: {
-          auto ds = std::dynamic_pointer_cast<DingoSchema<std::optional<std::shared_ptr<std::vector<double>>>>>(bs);
+          auto ds = std::dynamic_pointer_cast<
+              DingoSchema<std::optional<std::shared_ptr<std::vector<double>>>>>(
+              bs);
           ds->SetIsLe(le);
           break;
         }
@@ -87,7 +99,8 @@ void FormatSchema(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> sche
   }
 }
 
-int32_t* GetApproPerRecordSize(std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas) {
+int32_t* GetApproPerRecordSize(
+    std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> schemas) {
   int32_t key_size = 8;
   int32_t value_size = 0;
 

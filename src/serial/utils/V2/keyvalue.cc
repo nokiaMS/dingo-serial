@@ -34,5 +34,5 @@ void KeyValue::SetValue(const std::string& value) { this->value_ = value; }
 const std::string& KeyValue::GetKey() const { return key_; }
 const std::string& KeyValue::GetValue() const { return value_; }
 
-}  // namespace V2
+}  // namespace serialV2
 }  // namespace dingodb
