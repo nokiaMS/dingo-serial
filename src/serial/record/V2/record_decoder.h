@@ -20,13 +20,31 @@
 
 #include "any"
 #include "common.h"
+
+#include "functional"  // IWYU pragma: keep
+#include "optional"    // IWYU pragma: keep
+#include "serial/schema/V2/boolean_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/boolean_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/double_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/double_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/float_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/float_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/integer_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/integer_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/long_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/long_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/string_list_schema.h" // IWYU pragma: keep
+#include "serial/schema/V2/string_schema.h"  // IWYU pragma: keep
+#include "serial/utils/V2/keyvalue.h"        // IWYU pragma: keep
+#include "serial/utils/V2/utils.h" // IWYU pragma: keep
+#include "serial/utils/V2/utils.h"  // IWYU pragma: keep
+
 #include "serial/schema/V2/double_list_schema.h"
 #include "serial/utils/V2/keyvalue.h"
 #include "serial/utils/V2/utils.h"
 
 namespace dingodb {
 namespace serialV2 {
-
 class RecordDecoderV2;
 using RecordDecoderPtr = std::shared_ptr<RecordDecoderV2>;
 
