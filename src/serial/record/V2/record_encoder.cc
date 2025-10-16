@@ -31,6 +31,7 @@
 #include "serial/schema/V2/integer_schema.h"  // IWYU pragma: keep
 #include "serial/schema/V2/long_schema.h"  // IWYU pragma: keep
 #include "serial/schema/V2/string_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/decimal_schema.h"  // IWYU pragma: keep
 
 namespace dingodb {
 namespace serialV2 {
@@ -165,6 +166,14 @@ int RecordEncoderV2::EncodeKeyPrefix(char prefix, const std::vector<std::string 
         }
         break;
       }
+      case BaseSchema::kDecimal: {
+        auto ss = std::dynamic_pointer_cast<
+            DingoSchema<DecimalString>>(schema);
+        if (ss->IsKey() && i < keys.size()) {
+            ss->EncodeKeyPrefix(std::any(std::string(keys[i])), buf);
+        }
+            break;
+        }
       default: {
         break;
       }

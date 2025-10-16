@@ -35,6 +35,7 @@
 #include "serial/schema/V2/long_schema.h"  // IWYU pragma: keep
 #include "serial/schema/V2/string_list_schema.h" // IWYU pragma: keep
 #include "serial/schema/V2/string_schema.h"  // IWYU pragma: keep
+#include "serial/schema/V2/decimal_schema.h"  // IWYU pragma: keep
 #include "serial/utils/V2/keyvalue.h"        // IWYU pragma: keep
 #include "serial/utils/V2/utils.h" // IWYU pragma: keep
 #include "serial/utils/V2/utils.h"  // IWYU pragma: keep

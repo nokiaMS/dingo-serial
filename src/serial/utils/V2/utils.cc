@@ -49,6 +49,8 @@ void FormatSchema(std::vector<BaseSchemaPtr>& schemas, bool le) {
   for (auto& schema : schemas) {
     if (schema != nullptr) {
       schema->SetIsLe(le);
+      int ret = schema->GetType();
+      ret = schema->GetType();
     }
   }
 }

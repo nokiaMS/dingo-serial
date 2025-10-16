@@ -36,18 +36,22 @@ using namespace dingodb::serialV2;
 class DingoSerialTest : public testing::Test {
  public:
   void InitVector() {
-    schemas_.resize(11);
+    schemas_.resize(12);
 
     auto id = std::make_shared<DingoSchema<int32_t>>();
     id->SetIndex(0);
     id->SetAllowNull(false);
     id->SetIsKey(true);
+    id->SetPrecision(10);
+    id->SetScale(4);
     schemas_.at(0) = id;
 
     auto name = std::make_shared<DingoSchema<std::string>>();
     name->SetIndex(1);
     name->SetAllowNull(false);
     name->SetIsKey(true);
+    name->SetPrecision(10);
+    name->SetScale(4);
     schemas_.at(1) = name;
 
     auto gender = std::make_shared<DingoSchema<std::string>>();
@@ -66,6 +70,8 @@ class DingoSerialTest : public testing::Test {
     addr->SetIndex(4);
     addr->SetAllowNull(true);
     addr->SetIsKey(false);
+    addr->SetPrecision(10);
+    addr->SetScale(4);
     schemas_.at(4) = addr;
 
     auto exist = std::make_shared<DingoSchema<bool>>();
@@ -84,6 +90,8 @@ class DingoSerialTest : public testing::Test {
     test_null->SetIndex(7);
     test_null->SetAllowNull(true);
     test_null->SetIsKey(false);
+    test_null->SetPrecision(10);
+    test_null->SetScale(4);
     schemas_.at(7) = test_null;
 
     auto age = std::make_shared<DingoSchema<int32_t>>();
@@ -102,7 +110,17 @@ class DingoSerialTest : public testing::Test {
     salary->SetIndex(10);
     salary->SetAllowNull(true);
     salary->SetIsKey(false);
+    salary->SetPrecision(10);
+    salary->SetScale(4);
     schemas_.at(10) = salary;
+
+    auto money = std::make_shared<DingoSchema<DecimalString>>();
+    money->SetIndex(11);
+    money->SetAllowNull(true);
+    money->SetIsKey(false);
+    money->SetPrecision(10);
+    money->SetScale(4);
+    schemas_.at(11) = money;
   }
 
   void DeleteSchemas() {
@@ -111,7 +129,7 @@ class DingoSerialTest : public testing::Test {
   }
 
   void InitRecord() {
-    record_.resize(11);
+    record_.resize(12);
 
     int32_t id = 0;
     std::string name = "tn";
@@ -132,6 +150,7 @@ class DingoSerialTest : public testing::Test {
     int32_t age = -20;
     int64_t prev = -214748364700L;
     double salary = 873485.4234;
+    std::string money = "12.34";
 
     record_.at(0) = id;
     record_.at(1) = name;
@@ -142,6 +161,7 @@ class DingoSerialTest : public testing::Test {
     record_.at(8) = age;
     record_.at(9) = prev;
     record_.at(10) = salary;
+    record_.at(11) = money;
   }
 
   void DeleteRecords() {
@@ -1459,13 +1479,21 @@ TEST_F(DingoSerialTest, recordTest) {
   }
   // delete record2;
 
-  std::vector<int> index{0, 1, 3, 5};
-  std::unordered_map<int, int> index_serial{{0, 0}, {1, 1}, {3, 3}, {5, 5}};
-  std::vector<int> index_temp{0, 1, 3, 5};
+  std::vector<int> index{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  std::unordered_map<int, int> index_serial{{0, 0}, {1, 1}, {2, 2}, {3,3}, {4,4} ,{5, 5}, {6,6}, {7,7}, {8,8}, {9,9},{10,10} };
+  std::vector<int> index_temp{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   std::vector<std::any> record3;
   rd.Decode(key, value, index_serial, record3);
   i = 0;
   for (const auto& bs : schemas) {
+    if (bs->GetIndex() == 0 || bs->GetIndex() == 1 || bs->GetIndex() == 4 || bs->GetIndex() == 7 || bs->GetIndex() == 10 || bs->GetIndex() == 11) {
+      EXPECT_EQ(bs->GetPrecision(), 10);
+      EXPECT_EQ(bs->GetScale(), 4);
+    } else {
+      EXPECT_EQ(bs->GetPrecision(), 0);
+      EXPECT_EQ(bs->GetScale(), 0);
+    }
+
     BaseSchema::Type type = bs->GetType();
     switch (type) {
       case BaseSchema::kBool: {
@@ -1548,3 +1576,63 @@ TEST_F(DingoSerialTest, recordTest) {
   DeleteSchemas();
   DeleteRecords();
 }
+
+TEST_F(DingoSerialTest, decimalSchema) {
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(false);
+    Buf encode_buf(1, this->le);
+
+    std::string data = "12.34";
+
+    schema.EncodeKey(data, encode_buf);
+    Buf decode_buf(encode_buf.GetString(), this->le);
+
+    auto decode_data = schema.DecodeKey(decode_buf);
+    ASSERT_TRUE(decode_data.has_value());
+    EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
+  }
+
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(false);
+    std::string data = "12.34";
+
+    Buf encode_buf(1, this->le);
+    schema.EncodeValue(data, encode_buf);
+    Buf decode_buf(encode_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeValue(decode_buf);
+
+    ASSERT_TRUE(decode_data.has_value());
+    EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
+  }
+
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(false);
+
+    Buf encode_buf(1, this->le);
+    int size = schema.EncodeValue(std::any(), encode_buf);
+    EXPECT_EQ(0, size);
+  }
+
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(true);
+    Buf encode_buf(100, this->le);
+    schema.EncodeKey(std::any(), encode_buf);
+    Buf decode_buf(encode_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_buf);
+
+    EXPECT_FALSE(decode_data.has_value());
+  }
+}
+

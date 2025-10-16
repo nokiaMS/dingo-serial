@@ -40,12 +40,14 @@ class BaseSchema {
     kLong,
     kDouble,
     kString,
+    kDecimal,
     kBoolList,
     kIntegerList,
     kFloatList,
     kLongList,
     kDoubleList,
-    kStringList
+    kStringList,
+    kDecimalList
   };
 
   static const char* GetTypeString(Type type) {
@@ -62,6 +64,8 @@ class BaseSchema {
         return "kDouble";
       case kString:
         return "kString";
+      case kDecimal:
+        return "kDecimal";
       case kBoolList:
         return "kBoolList";
       case kIntegerList:
@@ -74,6 +78,8 @@ class BaseSchema {
         return "kDoubleList";
       case kStringList:
         return "kStringList";
+      case kDecimalList:
+        return "kDecimalList";
       default:
         return "unknown";
     }
@@ -99,6 +105,11 @@ class BaseSchema {
   void SetAllowNull(bool allow_null) { allow_null_ = allow_null; }
   bool isNull(const std::any& data) { return data.has_value() ? false : true; }
 
+  void SetPrecision(long precison) { precision_ = precison; }
+  void SetScale(long scale) { scale_ = scale; }
+  long GetPrecision() const { return precision_; }
+  long GetScale() const { return scale_; }
+
   virtual int SkipKey(Buf& buf) = 0;
   virtual int SkipValue(Buf& buf) = 0;
 
@@ -121,6 +132,8 @@ class BaseSchema {
   bool is_key_{false};
   bool allow_null_{false};
   int index_;
+  long precision_{0};
+  long scale_{0};
 };
 
 }  // namespace serialV2

@@ -27,6 +27,8 @@ class BaseSchema {
 
  private:
   std::string name_;
+  long precision_{0};
+  long scale_{0};
 
  public:
   virtual ~BaseSchema() = default;
@@ -37,6 +39,7 @@ class BaseSchema {
     kLong,
     kDouble,
     kString,
+    kDecimal,
     kBoolList,
     kIntegerList,
     kFloatList,
@@ -51,6 +54,12 @@ class BaseSchema {
   virtual int GetIndex() = 0;
   void SetName(const std::string& name) { name_ = name; }
   const std::string& GetName() const { return name_; }
+
+  void SetPrecision(long precison) { precision_ = precison; }
+  void SetScale(long scale) { scale_ = scale; }
+  long GetPrecision() const { return precision_; }
+  long GetScale() const { return scale_; }
+
   static const char* GetTypeString(Type type) {
     switch (type) {
       case kBool:
