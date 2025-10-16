@@ -30,7 +30,10 @@
 #include "serial/schema/V2/long_schema.h"
 #include "serial/schema/V2/string_list_schema.h"
 #include "serial/schema/V2/string_schema.h"
+#include "serial/schema/V2/decimal_schema.h"
+#include "serial/schema/V2/decimal_list_schema.h"
 #include "serial/schema/base_schema.h"
+#include "serial/utils/common.h"
 
 namespace dingodb {
 
@@ -154,6 +157,18 @@ std::shared_ptr<std::vector<std::shared_ptr<BaseSchema>>> ConvertSchemasV1(
         schemas_v1.push_back(item_v1);
         break;
       }
+      case BaseSchema::kDecimal: {
+        auto item_v1 = std::make_shared<
+            DingoSchema<std::optional<std::shared_ptr<std::string>>>>();
+        item_v1->SetIndex(item->GetIndex());
+        item_v1->SetAllowNull(item->AllowNull());
+        item_v1->SetIsKey(item->IsKey());
+        item_v1->SetName(item->GetName());
+        item_v1->SetPrecision(item->GetPrecision());
+        item_v1->SetScale(item->GetScale());
+        schemas_v1.push_back(item_v1);
+        break;
+      }
       case BaseSchema::kStringList: {
         auto item_v1 = std::make_shared<DingoSchema<
             std::optional<std::shared_ptr<std::vector<std::string>>>>>();
@@ -178,6 +193,8 @@ static void FillSchemaV2(std::shared_ptr<T>& item_v2,
   item_v2->SetAllowNull(item_v1->AllowNull());
   item_v2->SetIsKey(item_v1->IsKey());
   item_v2->SetName(item_v1->GetName());
+  item_v2->SetPrecision(item_v1->GetPrecision());
+  item_v2->SetScale(item_v1->GetScale());
 }
 
 template <class T>
@@ -294,6 +311,12 @@ std::vector<serialV2::BaseSchemaPtr> ConvertSchemasV2(
       }
       case BaseSchema::kString: {
         auto item_v2 = std::make_shared<serialV2::DingoSchema<std::string>>();
+        FillSchemaV2(item_v2, item);
+        schemas_v2.push_back(item_v2);
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        auto item_v2 = std::make_shared<serialV2::DingoSchema<DecimalString>>();
         FillSchemaV2(item_v2, item);
         schemas_v2.push_back(item_v2);
         break;

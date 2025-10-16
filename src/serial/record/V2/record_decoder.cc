@@ -91,12 +91,14 @@ CastAndDecodeOrSkipFuncPointer cast_and_decode_or_skip_func_ptrs[] = {
     CastAndDecodeOrSkip<int64_t>,
     CastAndDecodeOrSkip<double>,
     CastAndDecodeOrSkip<std::string>,
+    CastAndDecodeOrSkip<DecimalString>,
     CastAndDecodeOrSkip<std::vector<bool>>,
     CastAndDecodeOrSkip<std::vector<int32_t>>,
     CastAndDecodeOrSkip<std::vector<float>>,
     CastAndDecodeOrSkip<std::vector<int64_t>>,
     CastAndDecodeOrSkip<std::vector<double>>,
     CastAndDecodeOrSkip<std::vector<std::string>>,
+    CastAndDecodeOrSkip<std::vector<DecimalString>>,
 };
 
 RecordDecoderV2::RecordDecoderV2(int schema_version,
