@@ -46,8 +46,7 @@ class BaseSchema {
     kFloatList,
     kLongList,
     kDoubleList,
-    kStringList,
-    kDecimalList
+    kStringList
   };
 
   static const char* GetTypeString(Type type) {
@@ -78,8 +77,6 @@ class BaseSchema {
         return "kDoubleList";
       case kStringList:
         return "kStringList";
-      case kDecimalList:
-        return "kDecimalList";
       default:
         return "unknown";
     }
@@ -125,6 +122,9 @@ class BaseSchema {
   const uint8_t k_null = 0;
   const uint8_t k_not_null = 1;
 
+  long precision_{0};
+  long scale_{0};
+
  private:
   std::string name_;
 
@@ -132,8 +132,6 @@ class BaseSchema {
   bool is_key_{false};
   bool allow_null_{false};
   int index_;
-  long precision_{0};
-  long scale_{0};
 };
 
 }  // namespace serialV2

@@ -78,6 +78,7 @@ class RecordEncoderV2 {
   void EncodePrefix(Buf& buf, char prefix) const;
   void EncodeSchemaVersion(Buf& buf) const;
   void EncodeCodecVersion(Buf& buf) const;
+  void EncodeCodecVersionForKey(Buf& buf) const;
 
   // Flag for little end or not.
   bool le_;

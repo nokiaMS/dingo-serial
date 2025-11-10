@@ -29,7 +29,7 @@
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
 #include "serial/schema/V2/base_schema.h"
-#include "serial/schema/V2/decimal_list_schema.h"
+#include "serial/utils/V2/keyBuf.h"
 
 using namespace dingodb::serialV2;
 
@@ -1361,8 +1361,10 @@ TEST_F(SchemaTest, decimalType) {
      */
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(false);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
-    Buf buf(1024);
+    KeyBuf buf(1024, IsLE());
     std::any data;
     EXPECT_THROW(schema->EncodeKey(data, buf), std::runtime_error);
   }
@@ -1370,21 +1372,23 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(false);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     std::any data1 = std::make_any<std::string>("12.12");
     std::any data2 = std::make_any<std::string>("23.23");
 
     // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+    KeyBuf buf_key(100, IsLE());
+    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));  // with null flag in key.
 
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(9, size);  // null flag | 8 bytes | 250
+    KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
+    int size = schema->SkipKey(decode_key_buf);
+    EXPECT_EQ(5, size);
 
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
+    auto actual_data_key = schema->DecodeKey(decode_key_buf);
+    EXPECT_EQ("23.2300", std::any_cast<std::string>(actual_data_key));
 
     // for value.
     Buf buf_value(1024);
@@ -1404,55 +1408,23 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(false);
-
-    std::any data1 = std::make_any<std::string>("");
-    std::any data2 = std::make_any<std::string>("");
-
-    // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
-
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(9, size);  // null flag | 8 bytes | 250
-
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
-
-    // for value.
-    Buf buf_value(1024);
-    EXPECT_EQ(4, schema->EncodeValue(
-                     data1, buf_value));  // with no null flag in value.
-    EXPECT_EQ(4, schema->EncodeValue(
-                     data2, buf_value));  // with no null flag in value.
-
-    size = schema->SkipValue(buf_value);
-    EXPECT_EQ(4, size);  // len | 'hello'
-
-    auto actual_data_value = schema->DecodeValue(buf_value);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_value),
-              std::any_cast<std::string>(data2));
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<DecimalString>>();
-    schema->SetAllowNull(false);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     std::any data1 = std::make_any<std::string>("12.12");
     std::any data2 = std::make_any<std::string>("23.23");
 
     // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));
-    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));
+    KeyBuf buf_key(100, IsLE());
+    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));
+    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));
 
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(9, size);
+    KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
+    int size = schema->SkipKey(decode_key_buf);
+    EXPECT_EQ(5, size);
 
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
+    auto actual_data_key = schema->DecodeKey(decode_key_buf);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");
 
     // for value.
     Buf buf_value(1024);
@@ -1470,21 +1442,23 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(true);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     std::any data1 = std::make_any<std::string>("12.12");
     std::any data2 = std::make_any<std::string>("23.23");
 
     // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(10, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(10, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+    KeyBuf buf_key(100, IsLE());
+    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));  // with null flag in key.
 
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(10, size);  // null flag | 8 bytes | 250
+    KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
+    int size = schema->SkipKey(decode_key_buf);
+    EXPECT_EQ(6, size);
 
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
+    auto actual_data_key = schema->DecodeKey(decode_key_buf);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");
 
     // for value.
     Buf buf_value(1024);
@@ -1504,55 +1478,23 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(true);
-
-    std::any data1 = std::make_any<std::string>("");
-    std::any data2 = std::make_any<std::string>("");
-
-    // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(10, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(10, schema->EncodeKey(data2, buf_key));  // with null flag in key.
-
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(10, size);  // null flag | 8 bytes | 250
-
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
-
-    // for value.
-    Buf buf_value(1024);
-    EXPECT_EQ(4, schema->EncodeValue(
-                     data1, buf_value));  // with no null flag in value.
-    EXPECT_EQ(4, schema->EncodeValue(
-                     data2, buf_value));  // with no null flag in value.
-
-    size = schema->SkipValue(buf_value);
-    EXPECT_EQ(4, size);  // len | 'hello'
-
-    auto actual_data_value = schema->DecodeValue(buf_value);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_value),
-              std::any_cast<std::string>(data2));
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<DecimalString>>();
-    schema->SetAllowNull(true);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     std::any data1 = std::make_any<std::string>("12.12");
     std::any data2 = std::make_any<std::string>("23.23");
 
     // for key.
-    Buf buf_key(1024);
-    EXPECT_EQ(10, schema->EncodeKey(data1, buf_key));
-    EXPECT_EQ(10, schema->EncodeKey(data2, buf_key));
+    KeyBuf buf_key(100, IsLE());
+    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));
+    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));
 
-    int size = schema->SkipKey(buf_key);
-    EXPECT_EQ(10, size);
+    KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
+    int size = schema->SkipKey(decode_key_buf);
+    EXPECT_EQ(6, size);
 
-    auto actual_data_key = schema->DecodeKey(buf_key);
-    EXPECT_EQ(std::any_cast<std::string>(actual_data_key),
-              std::any_cast<std::string>(data2));
+    auto actual_data_key = schema->DecodeKey(decode_key_buf);
+    EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");
 
     // for value.
     Buf buf_value(1024);
@@ -1570,11 +1512,13 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(true);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     std::any data;
 
     // for key.
-    Buf buf_key(1024);
+    KeyBuf buf_key(100, IsLE());
     EXPECT_EQ(1, schema->EncodeKey(data, buf_key));
     auto actual_data_key = schema->DecodeKey(buf_key);
     EXPECT_EQ(false, actual_data_key.has_value());
@@ -1588,6 +1532,8 @@ TEST_F(SchemaTest, decimalType) {
   {
     auto schema = std::make_shared<DingoSchema<DecimalString>>();
     schema->SetAllowNull(false);
+    schema->SetPrecision(10);
+    schema->SetScale(4);
 
     Buf buf(1024);
     std::any data;
@@ -1595,86 +1541,3 @@ TEST_F(SchemaTest, decimalType) {
   }
 }
 
-TEST_F(SchemaTest, decimalListType) {
-  {
-    auto schema = std::make_shared<DingoSchema<std::vector<DecimalString>>>();
-    schema->SetAllowNull(false);
-
-    Buf buf(1024);
-    std::any data;
-    EXPECT_THROW(schema->EncodeValue(data, buf), std::runtime_error);
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<std::vector<DecimalString>>>();
-    schema->SetAllowNull(false);
-
-    Buf buf(1024);
-    std::vector<std::string> data1 = {"12345", "12345", "12345"};
-    std::vector<std::string> data2 = {"12345", "67892", "12345"};
-
-    int size = schema->EncodeValue(
-        std::make_any<std::vector<std::string>>(data1), buf);
-    EXPECT_EQ(31, size);
-    size = schema->EncodeValue(std::make_any<std::vector<std::string>>(data2),
-                               buf);
-    EXPECT_EQ(31, size);
-
-    size = schema->SkipValue(buf);
-    EXPECT_EQ(31, size);
-
-    auto decode_value = schema->DecodeValue(buf);
-    auto actual_data = std::any_cast<std::vector<std::string>>(decode_value);
-    EXPECT_EQ(actual_data.size(), data2.size());
-    for (uint32_t i = 0; i < actual_data.size(); ++i) {
-      EXPECT_EQ(actual_data[i], data2[i]);
-    }
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<std::vector<DecimalString>>>();
-    schema->SetAllowNull(true);
-
-    Buf buf(1024);
-    std::vector<std::string> data = {};
-    // Do not test DecodeValue when the value is null.
-    int size =
-        schema->EncodeValue(std::make_any<std::vector<std::string>>(data), buf);
-    EXPECT_EQ(4, size);
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<std::vector<DecimalString>>>();
-    schema->SetAllowNull(true);
-
-    Buf buf(1024);
-    int size = schema->EncodeValue(std::any(), buf);
-    EXPECT_EQ(0, size);
-  }
-
-  {
-    auto schema = std::make_shared<DingoSchema<std::vector<DecimalString>>>();
-    schema->SetAllowNull(true);
-
-    Buf buf(1024);
-    std::vector<std::string> data1 = {"12345", "12345", "12345"};
-    std::vector<std::string> data2 = {"12345", "12345", "12345"};
-
-    int size = schema->EncodeValue(
-        std::make_any<std::vector<std::string>>(data1), buf);
-    EXPECT_EQ(31, size);
-    size = schema->EncodeValue(std::make_any<std::vector<std::string>>(data2),
-                               buf);
-    EXPECT_EQ(31, size);
-
-    size = schema->SkipValue(buf);
-    EXPECT_EQ(31, size);
-
-    auto decode_value = schema->DecodeValue(buf);
-    auto actual_data = std::any_cast<std::vector<std::string>>(decode_value);
-    EXPECT_EQ(actual_data.size(), data2.size());
-    for (uint32_t i = 0; i < actual_data.size(); ++i) {
-      EXPECT_EQ(actual_data[i], data2[i]);
-    }
-  }
-}

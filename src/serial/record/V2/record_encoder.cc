@@ -22,6 +22,7 @@
 #include "common.h"
 
 // #include "common/helper.h"
+#include "serial/utils/V2/keyBuf.h"
 #include "serial/utils/V2/keyvalue.h"  // IWYU pragma: keep
 #include "serial/utils/V2/utils.h"     // IWYU pragma: keep
 
@@ -63,6 +64,13 @@ void RecordEncoderV2::EncodeCodecVersion(Buf& buf) const {
   buf.WriteInt(codec_version_);
 }
 
+void RecordEncoderV2::EncodeCodecVersionForKey(Buf& buf) const {
+  buf.ReverseWrite(codec_version_);
+  buf.ReverseWrite(0);
+  buf.ReverseWrite(0);
+  buf.ReverseWrite(0);
+}
+
 inline void RecordEncoderV2::EncodeSchemaVersion(Buf& buf) const {
   buf.WriteInt(schema_version_);
 }
@@ -82,10 +90,20 @@ int RecordEncoderV2::Encode(char prefix, const std::vector<std::any>& record,
 
 int RecordEncoderV2::EncodeKey(char prefix, const std::vector<std::any>& record,
                                std::string& output) {
-  Buf buf(kBufInitCapacity, this->le_);
+  int bufLen = 1 + 8 + 4;   //namespace|common_id|...|codecVersion, 4 bytes for codecversion.
+  for (int i = 0; i < schemas_.size(); ++i) {
+    const auto& schema = schemas_.at(i);
+
+    if (schema->IsKey()) {
+      bufLen += schema->GetLengthForKey();
+    }
+  }
+
+  KeyBuf buf(bufLen, this->le_);
 
   // namespace | common_id | ... | codecVersion
   EncodePrefix(buf, prefix);
+  EncodeCodecVersionForKey(buf);
 
   // loop meta schemas.
   for (int i = 0; i < schemas_.size(); ++i) {
@@ -93,11 +111,18 @@ int RecordEncoderV2::EncodeKey(char prefix, const std::vector<std::any>& record,
 
     if (schema->IsKey()) {
       const auto& column = record.at(i);
+      int len = schema->GetLengthForKey();
+      if (schema->GetType() == BaseSchema::kString || schema->GetType() == BaseSchema::kDecimal) {
+        len = std::any_cast<std::string>(column).length();
+
+        // Keep 2 * len buffer, as string is enlarged after encoded.
+        buf.EnsureRemainder(len * 2);
+      } else {
+        buf.EnsureRemainder(len);
+      }
       schema->EncodeKey(column, buf);
     }
   }
-
-  EncodeCodecVersion(buf);
 
   buf.GetString(output);
   return output.size();
@@ -223,6 +248,7 @@ int RecordEncoderV2::EncodeValue(const std::vector<std::any>& record,
 
         // write offset
         buf.WriteInt(offset_pos, -1);
+
         offset_pos += 4;
       } else {
         cnt_not_null_col++;

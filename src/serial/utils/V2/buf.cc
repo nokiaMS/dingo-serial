@@ -103,6 +103,35 @@ void Buf::WriteShort(size_t pos, int16_t data) {
   }
 }
 
+void Buf::ReverseWrite(uint8_t b) { buf_.at(reverse_pos_--) = b; }
+
+void Buf::ReverseWriteInt(int32_t i) {
+  uint32_t* ii = (uint32_t*)&i;
+  if (this->le_) {
+    ReverseWrite(*ii >> 24);
+    ReverseWrite(*ii >> 16);
+    ReverseWrite(*ii >> 8);
+    ReverseWrite(*ii);
+  } else {
+    ReverseWrite(*ii);
+    ReverseWrite(*ii >> 8);
+    ReverseWrite(*ii >> 16);
+    ReverseWrite(*ii >> 24);
+  }
+}
+
+uint8_t Buf::ReverseRead() { return buf_.at(reverse_pos_--); }
+
+int32_t Buf::ReverseReadInt() {
+  if (this->le_) {
+    return ((ReverseRead() & 0xFF) << 24) | ((ReverseRead() & 0xFF) << 16) |
+           ((ReverseRead() & 0xFF) << 8) | (ReverseRead() & 0xFF);
+  } else {
+    return (ReverseRead() & 0xFF) | ((ReverseRead() & 0xFF) << 8) |
+           ((ReverseRead() & 0xFF) << 16) | ((ReverseRead() & 0xFF) << 24);
+  }
+}
+
 void Buf::WriteInt(size_t pos, int32_t data) {
   if (DINGO_UNLIKELY(pos + 4 > buf_.size())) {
     throw std::runtime_error("Out of range.");
@@ -305,6 +334,8 @@ int32_t Buf::ReadInt(int pos) {
            ((buf_.at(pos + 3) & 0xFF) << 24);
   }
 }
+
+void Buf::ReverseSkipInt() { reverse_pos_ -= 4; }
 
 int64_t Buf::ReadLong() {
   uint64_t l = Read() & 0xFF;

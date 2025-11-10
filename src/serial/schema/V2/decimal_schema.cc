@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "serial/utils/V2/compiler.h"
+#include "serial/utils/serializer/decimal/MyDecimal.h"
 
 namespace dingodb {
 namespace serialV2 {
@@ -28,6 +29,7 @@ const int kGroupSize = 8;
 const int kPadGroupSize = 9;
 const uint8_t kMarker = 255;
 
+/*
 int DingoSchema<DecimalString>::EncodeBytesComparable(const std::string& data,
                                                     Buf& buf) {
   for (uint32_t i = 0; i < data.size(); ++i) {
@@ -46,7 +48,9 @@ int DingoSchema<DecimalString>::EncodeBytesComparable(const std::string& data,
 
   return group_num * 9;
 }
+*/
 
+/*
 int DingoSchema<DecimalString>::DecodeBytesComparable(Buf& buf,
                                                     std::string& data) {
   int size = 0;
@@ -79,6 +83,7 @@ int DingoSchema<DecimalString>::DecodeBytesComparable(Buf& buf,
 
   return size;
 }
+*/
 
 int DingoSchema<DecimalString>::EncodeBytesNotComparable(const std::string& data,
                                                        Buf& buf) {
@@ -109,7 +114,7 @@ void DingoSchema<DecimalString>::DecodeBytesNotComparable(Buf& buf,
 }
 
 int DingoSchema<DecimalString>::GetLengthForKey() {
-  throw std::runtime_error("String unsupport length");
+  return 100;  //A preferred length. The buffer should be enlarged if it is not enough.
 }
 
 int DingoSchema<DecimalString>::GetLengthForValue() {
@@ -122,19 +127,13 @@ int DingoSchema<DecimalString>::SkipKey(Buf& buf) {
       return 1;
     }
 
-    std::string data(1024, 0);
-    int size = DecodeBytesComparable(buf, data);
-    if (size == -1) {
-      throw std::runtime_error("decode comparable string error.");
-    }
+    int size = buf.ReverseReadInt();  //get length.
+    buf.Skip(size);
 
     return size + 1;  // with null flag.
   } else {
-    std::string data(1024, 0);
-    int size = DecodeBytesComparable(buf, data);
-    if (size == -1) {
-      throw std::runtime_error("decode comparable string error.");
-    }
+    int size = buf.ReverseReadInt();  //get length.
+    buf.Skip(size);
 
     return size;
   }
@@ -147,6 +146,25 @@ int DingoSchema<DecimalString>::SkipValue(Buf& buf) {
   return size + 4;
 }
 
+int DingoSchema<DecimalString>::internalEncodeKey(std::string& data, Buf& buf) {
+  MyDecimal myDecimal = MyDecimal(data, (int)precision_, (int)scale_);
+  std::string toBinValue = myDecimal.toBin();
+  int len = 0;
+
+  for (int i = 0; i < toBinValue.length(); ++i) {
+    buf.Write((char) toBinValue[i]);
+    len++;
+  }
+
+  /*
+  while (char b : toBinValue) {
+    buf.Write((char) b);
+    len++;
+  }
+  */
+  return len;
+}
+
 int DingoSchema<DecimalString>::EncodeKey(const std::any& data, Buf& buf) {
   if (DINGO_UNLIKELY(!AllowNull() && !data.has_value())) {
     throw std::runtime_error("data not has value.");
@@ -154,16 +172,20 @@ int DingoSchema<DecimalString>::EncodeKey(const std::any& data, Buf& buf) {
   if (AllowNull()) {
     if (data.has_value()) {
       buf.Write(k_not_null);
-      const auto& ref_data = std::any_cast<const std::string&>(data);
-      return EncodeBytesComparable(ref_data, buf) + 1;
+      auto ref_data = std::any_cast<const std::string&>(data);
+      int length = internalEncodeKey(ref_data, buf);
+      buf.ReverseWriteInt(length);
+      return length;
     } else {
       buf.Write(k_null);
       return 1;
     }
   } else {
     if (data.has_value()) {
-      const auto& ref_data = std::any_cast<const std::string&>(data);
-      return EncodeBytesComparable(ref_data, buf);
+      auto ref_data = std::any_cast<const std::string&>(data);
+      int length = internalEncodeKey(ref_data, buf);
+      buf.ReverseWriteInt(length);
+      return length;
     } else {
       return 0;
     }
@@ -187,6 +209,17 @@ int DingoSchema<DecimalString>::EncodeValue(const std::any& data, Buf& buf) {
   return 0;
 }
 
+std::string DingoSchema<DecimalString>::internalReadDecimal(Buf& buf) {
+  int length = buf.ReverseReadInt();
+  std::string data;
+  data.resize(length);  //= new char[length];
+  for (int i = 0; i < length; ++i) {
+    data[i] = buf.Read();
+  }
+
+  return MyDecimal(data, (int)this->precision_, (int)this->scale_, true).decimalToString();
+}
+
 std::any DingoSchema<DecimalString>::DecodeKey(Buf& buf) {
   if (AllowNull()) {
     if (buf.Read() == k_null) {
@@ -194,11 +227,13 @@ std::any DingoSchema<DecimalString>::DecodeKey(Buf& buf) {
     }
   }
 
-  std::string data;
+  std::string data = internalReadDecimal(buf);
+  /*
   int size = DecodeBytesComparable(buf, data);
   if (size == -1) {
     throw std::runtime_error("decode comparable string error.");
   }
+  */
 
   return std::move(std::any(std::move(data)));
 }
