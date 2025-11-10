@@ -52,6 +52,9 @@ class DingoSchema<DecimalString> : public BaseSchema {
   static int EncodeBytesNotComparable(const std::string& data, Buf& buf);
   static void DecodeBytesNotComparable(Buf& buf, std::string& data);
   static void DecodeBytesNotComparable(Buf& buf, std::string& data, int offset);
+
+  int internalEncodeKey(std::string& data, Buf& buf);
+  std::string internalReadDecimal(Buf& buf);
 };
 
 }  // namespace serialV2

@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "serial/utils/V2/utils.h"
+#include "serial/utils/V2/keyBuf.h"
 #include "serial/record/V2/value_header.h"
 
 namespace dingodb {
@@ -125,7 +126,24 @@ inline bool RecordDecoderV2::CheckPrefix(Buf& buf) const {
 }
 
 inline bool RecordDecoderV2::CheckReverseTag(Buf& buf) const {
-  if (buf.ReadInt(buf.Size() - 4) == codec_version_) {
+  int codec_version = buf.ReverseRead() & 0xFF;
+  buf.ReverseRead();
+  buf.ReverseRead();
+  buf.ReverseRead();
+
+  if (codec_version == codec_version_) {
+    return true;
+  }
+  return false;
+}
+
+inline bool RecordDecoderV2::CheckReverseTagForKey(Buf& buf) const {
+  int codec_version = buf.ReverseRead();
+  buf.ReverseRead();
+  buf.ReverseRead();
+  buf.ReverseRead();
+
+  if (codec_version == codec_version_) {
     return true;
   }
   return false;
@@ -148,10 +166,10 @@ void DecodeOrSkip(BaseSchemaPtr schema, Buf& key_buf, Buf& value_buf,
 
 int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
                             std::vector<std::any>& record /*output*/) {
-  Buf key_buf(key, this->le_);
+  KeyBuf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
 
-  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf) ||
+  if (!CheckPrefix(key_buf) || !CheckReverseTagForKey(key_buf) ||
       !CheckSchemaVersion(value_buf)) {
     return -1;
   }
@@ -174,10 +192,10 @@ int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
 
 int RecordDecoderV2::Decode(std::string&& key, std::string&& value,
                             std::vector<std::any>& record) {
-  Buf key_buf(std::move(key), this->le_);
+  KeyBuf key_buf(std::move(key), this->le_);
   Buf value_buf(std::move(value), this->le_);
 
-  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf) ||
+  if (!CheckPrefix(key_buf) || !CheckReverseTagForKey(key_buf) ||
       !CheckSchemaVersion(value_buf)) {
     return -1;
   }
@@ -201,9 +219,10 @@ int RecordDecoderV2::Decode(std::string&& key, std::string&& value,
 
 int RecordDecoderV2::DecodeKey(const std::string& key,
                                std::vector<std::any>& record /*output*/) {
-  Buf key_buf(key, this->le_);
+  KeyBuf key_buf(key, this->le_);
+  Buf value_buf(kBufInitCapacity, this->le_);
 
-  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf)) {
+  if (!CheckPrefix(key_buf) || !CheckReverseTagForKey(key_buf)) {
     return -1;
   }
 
@@ -215,7 +234,7 @@ int RecordDecoderV2::DecodeKey(const std::string& key,
   int index = 0;
   for (const auto& bs : schemas_) {
     if (bs && bs->IsKey()) {
-      DecodeOrSkip(bs, key_buf, key_buf, record, index, false, value_header);
+      DecodeOrSkip(bs, key_buf, value_buf, record, index, false, value_header);
     }
     index++;
   }
@@ -231,10 +250,10 @@ int RecordDecoderV2::Decode(const KeyValue& key_value,
 int RecordDecoderV2::Decode(const std::string& key, const std::string& value,
                             std::unordered_map<int, int>& column_indexes_serial,
                             std::vector<std::any>& record) {
-  Buf key_buf(key, this->le_);
+  KeyBuf key_buf(key, this->le_);
   Buf value_buf(value, this->le_);
 
-  if (!CheckPrefix(key_buf) || !CheckReverseTag(key_buf) ||
+  if (!CheckPrefix(key_buf) || !CheckReverseTagForKey(key_buf) ||
       !CheckSchemaVersion(value_buf)) {
     return -1;
   }

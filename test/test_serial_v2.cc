@@ -15,6 +15,7 @@
 #include <byteswap.h>
 #include <gtest/gtest.h>
 
+#include <iostream>
 #include <algorithm>
 #include <any>
 #include <bitset>
@@ -26,6 +27,7 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "../src/serial/utils/V2/keyBuf.h"
 #include "serial/record/V2/record_decoder.h"
 #include "serial/record/V2/record_encoder.h"
 #include "serial/schema/V2/base_schema.h"
@@ -33,10 +35,27 @@
 
 using namespace dingodb::serialV2;
 
+/**
+ * key:
+ *  0 - int32
+ *  1 - string
+ *  2 - string
+ *  3 - decimal
+ *  4 - int64
+ * value:
+ *  5 - string
+ *  6 - bool
+ *  7 - string
+ *  8 - int
+ *  9 - int
+ *  10 - long
+ *  11 - double
+ *  12 - decimal
+ */
 class DingoSerialTest : public testing::Test {
  public:
   void InitVector() {
-    schemas_.resize(12);
+    schemas_.resize(13);
 
     auto id = std::make_shared<DingoSchema<int32_t>>();
     id->SetIndex(0);
@@ -60,67 +79,75 @@ class DingoSerialTest : public testing::Test {
     gender->SetIsKey(true);
     schemas_.at(2) = gender;
 
+    auto money1 = std::make_shared<DingoSchema<DecimalString>>();
+    money1->SetIndex(3);
+    money1->SetAllowNull(false);
+    money1->SetIsKey(true);
+    money1->SetPrecision(10);
+    money1->SetScale(4);
+    schemas_.at(3) = money1;
+
     auto score = std::make_shared<DingoSchema<int64_t>>();
-    score->SetIndex(3);
+    score->SetIndex(4);
     score->SetAllowNull(false);
     score->SetIsKey(true);
-    schemas_.at(3) = score;
+    schemas_.at(4) = score;
 
     auto addr = std::make_shared<DingoSchema<std::string>>();
-    addr->SetIndex(4);
+    addr->SetIndex(5);
     addr->SetAllowNull(true);
     addr->SetIsKey(false);
     addr->SetPrecision(10);
     addr->SetScale(4);
-    schemas_.at(4) = addr;
+    schemas_.at(5) = addr;
 
     auto exist = std::make_shared<DingoSchema<bool>>();
-    exist->SetIndex(5);
+    exist->SetIndex(6);
     exist->SetAllowNull(false);
     exist->SetIsKey(false);
-    schemas_.at(5) = exist;
+    schemas_.at(6) = exist;
 
     auto pic = std::make_shared<DingoSchema<std::string>>();
-    pic->SetIndex(6);
+    pic->SetIndex(7);
     pic->SetAllowNull(true);
     pic->SetIsKey(false);
-    schemas_.at(6) = pic;
+    schemas_.at(7) = pic;
 
     auto test_null = std::make_shared<DingoSchema<int32_t>>();
-    test_null->SetIndex(7);
+    test_null->SetIndex(8);
     test_null->SetAllowNull(true);
     test_null->SetIsKey(false);
     test_null->SetPrecision(10);
     test_null->SetScale(4);
-    schemas_.at(7) = test_null;
+    schemas_.at(8) = test_null;
 
     auto age = std::make_shared<DingoSchema<int32_t>>();
-    age->SetIndex(8);
+    age->SetIndex(9);
     age->SetAllowNull(false);
     age->SetIsKey(false);
-    schemas_.at(8) = age;
+    schemas_.at(9) = age;
 
     auto prev = std::make_shared<DingoSchema<int64_t>>();
-    prev->SetIndex(9);
+    prev->SetIndex(10);
     prev->SetAllowNull(false);
     prev->SetIsKey(false);
-    schemas_.at(9) = prev;
+    schemas_.at(10) = prev;
 
     auto salary = std::make_shared<DingoSchema<double>>();
-    salary->SetIndex(10);
+    salary->SetIndex(11);
     salary->SetAllowNull(true);
     salary->SetIsKey(false);
     salary->SetPrecision(10);
     salary->SetScale(4);
-    schemas_.at(10) = salary;
+    schemas_.at(11) = salary;
 
     auto money = std::make_shared<DingoSchema<DecimalString>>();
-    money->SetIndex(11);
+    money->SetIndex(12);
     money->SetAllowNull(true);
     money->SetIsKey(false);
     money->SetPrecision(10);
     money->SetScale(4);
-    schemas_.at(11) = money;
+    schemas_.at(12) = money;
   }
 
   void DeleteSchemas() {
@@ -129,7 +156,7 @@ class DingoSerialTest : public testing::Test {
   }
 
   void InitRecord() {
-    record_.resize(12);
+    record_.resize(13);
 
     int32_t id = 0;
     std::string name = "tn";
@@ -155,13 +182,53 @@ class DingoSerialTest : public testing::Test {
     record_.at(0) = id;
     record_.at(1) = name;
     record_.at(2) = gender;
-    record_.at(3) = score;
-    record_.at(4) = addr;
-    record_.at(5) = exist;
-    record_.at(8) = age;
-    record_.at(9) = prev;
-    record_.at(10) = salary;
-    record_.at(11) = money;
+    record_.at(3) = money;
+    record_.at(4) = score;
+    record_.at(5) = addr;
+    record_.at(6) = exist;
+    record_.at(9) = age;
+    record_.at(10) = prev;
+    record_.at(11) = salary;
+    record_.at(12) = money;
+  }
+
+  void InitRecordForMemAutoInc() {
+    record_.resize(13);
+
+    int32_t id = 0;
+    std::string name = "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 "
+    "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 n";
+    std::string gender = "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 "
+    "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 n";
+    int64_t score = 214748364700L;
+    std::string addr =
+        "test address test 中文 表情😊🏷️👌 test "
+        "测试测试测试三🤣😂😁🐱‍🐉👏🐱‍💻✔🤳🤦‍♂️🤦‍♀️"
+        "🙌"
+        "测"
+        "试"
+        "测"
+        "试"
+        "测"
+        "试伍佰肆拾陆万伍仟陆佰伍拾肆元/n/r/r/ndfs肥肉士大夫";
+    bool exist = false;
+
+    int32_t age = -20;
+    int64_t prev = -214748364700L;
+    double salary = 873485.4234;
+    std::string money = "12.34";
+
+    record_.at(0) = id;
+    record_.at(1) = name;
+    record_.at(2) = gender;
+    record_.at(3) = money;
+    record_.at(4) = score;
+    record_.at(5) = addr;
+    record_.at(6) = exist;
+    record_.at(9) = age;
+    record_.at(10) = prev;
+    record_.at(11) = salary;
+    record_.at(12) = money;
   }
 
   void DeleteRecords() {
@@ -194,21 +261,21 @@ TEST_F(DingoSerialTest, boolSchema) {
 
     // test false.
     bool data = false;
-    Buf encode_buf1(1, this->le);
-    schema.EncodeKey(data, encode_buf1);
+    KeyBuf encode_key_buf1(1, this->le);
+    schema.EncodeKey(data, encode_key_buf1);
 
-    Buf decode_buf1(encode_buf1.GetString(), this->le);
-    auto decode_data1 = schema.DecodeKey(decode_buf1);
+    KeyBuf decode_key_buf1(encode_key_buf1.GetString(), this->le);
+    auto decode_data1 = schema.DecodeKey(decode_key_buf1);
     ASSERT_TRUE(decode_data1.has_value());
     EXPECT_EQ(false, std::any_cast<bool>(decode_data1));
 
     // test true.
     data = true;
-    Buf encode_buf2(1, this->le);
-    schema.EncodeKey(data, encode_buf2);
+    KeyBuf encode_key_buf2(1, this->le);
+    schema.EncodeKey(data, encode_key_buf2);
 
-    Buf decode_buf2(encode_buf2.GetString(), this->le);
-    auto decode_data2 = schema.DecodeKey(decode_buf2);
+    KeyBuf decode_key_buf2(encode_key_buf2.GetString(), this->le);
+    auto decode_data2 = schema.DecodeKey(decode_key_buf2);
     ASSERT_TRUE(decode_data2.has_value());
     EXPECT_EQ(true, std::any_cast<bool>(decode_data2));
   }
@@ -252,9 +319,12 @@ TEST_F(DingoSerialTest, boolSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(true);
     schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeValue(std::any(), encode_buf);
-    EXPECT_EQ("", encode_buf.GetString());
+    KeyBuf encode_buf(2, this->le);
+    schema.EncodeKey(std::any(), encode_buf);
+
+    KeyBuf decode_buf(encode_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_buf);
+    ASSERT_FALSE(decode_data.has_value());
   }
 }
 
@@ -268,10 +338,10 @@ TEST_F(DingoSerialTest, integerSchema) {
     schema.SetAllowNull(false);
     schema.SetIsKey(true);
     int32_t data = 1543234;
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf encode_key_buf(4, this->le);
+    schema.EncodeKey(data, encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_TRUE(decode_data.has_value());
     EXPECT_EQ(data, std::any_cast<int32_t>(decode_data));
   }
@@ -317,12 +387,12 @@ TEST_F(DingoSerialTest, integerSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(true);
     schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeKey(std::any(), encode_buf);
-    EXPECT_EQ(5, encode_buf.GetString().length());
+    KeyBuf encode_key_buf(5, this->le);
+    schema.EncodeKey(std::any(), encode_key_buf);
+    EXPECT_EQ(5, encode_key_buf.GetString().length());
 
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_FALSE(decode_data.has_value());
   }
 }
@@ -358,9 +428,9 @@ TEST_F(DingoSerialTest, integerSchemaLeBe) {
     /*
      * int in key.
      */
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(5, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -394,8 +464,8 @@ TEST_F(DingoSerialTest, integerSchemaLeBe) {
     std::bitset<8> bs23(bs2.at(3));
     EXPECT_EQ(bs23, value_data_3);
 
-    Buf decode_buf(bs2, this->le);
-    auto decode_data = schema.DecodeValue(decode_buf);
+    KeyBuf decode_key_buf(bs2, this->le);
+    auto decode_data = schema.DecodeValue(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<int32_t>(decode_data));
   }
 }
@@ -426,9 +496,9 @@ TEST_F(DingoSerialTest, integerSchemaFakeLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, !this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(100, !this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -439,8 +509,8 @@ TEST_F(DingoSerialTest, integerSchemaFakeLeBe) {
     EXPECT_EQ(bs13, key_data_2);
     std::bitset<8> bs14(bs1.at(4));
     EXPECT_EQ(bs14, key_data_3);
-    Buf decode_buf(bs1, !this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, !this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<int32_t>(decode_data));
   }
 
@@ -491,9 +561,9 @@ TEST_F(DingoSerialTest, floatSchemaLeBe) {
   }
 
   {
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(5, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -504,8 +574,8 @@ TEST_F(DingoSerialTest, floatSchemaLeBe) {
     EXPECT_EQ(bs13, key_data_2);
     std::bitset<8> bs14(bs1.at(4));
     EXPECT_EQ(bs14, key_data_3);
-    Buf decode_buf(bs1, this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<float>(decode_data));
   }
 
@@ -561,9 +631,9 @@ TEST_F(DingoSerialTest, floatSchemaFakeLeBe) {
   }
 
   {
-    Buf encode_buf(1, !this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(5, !this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -574,8 +644,8 @@ TEST_F(DingoSerialTest, floatSchemaFakeLeBe) {
     EXPECT_EQ(bs13, key_data_2);
     std::bitset<8> bs14(bs1.at(4));
     EXPECT_EQ(bs14, key_data_3);
-    Buf decode_buf(bs1, !this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, !this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<float>(decode_data));
   }
 
@@ -636,9 +706,9 @@ TEST_F(DingoSerialTest, longSchemaLeBe) {
   }
 
   {
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(9, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -657,8 +727,8 @@ TEST_F(DingoSerialTest, longSchemaLeBe) {
     EXPECT_EQ(bs17, key_data_6);
     std::bitset<8> bs18(bs1.at(8));
     EXPECT_EQ(bs18, key_data_7);
-    Buf decode_buf(bs1, this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_TRUE(decode_data.has_value());
     ASSERT_EQ(data1, std::any_cast<int64_t>(decode_data));
   }
@@ -728,9 +798,9 @@ TEST_F(DingoSerialTest, longSchemaFakeLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, !this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(100, !this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -749,8 +819,8 @@ TEST_F(DingoSerialTest, longSchemaFakeLeBe) {
     EXPECT_EQ(bs17, key_data_6);
     std::bitset<8> bs18(bs1.at(8));
     EXPECT_EQ(bs18, key_data_7);
-    Buf decode_buf(bs1, !this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, !this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<int64_t>(decode_data));
   }
 
@@ -818,9 +888,9 @@ TEST_F(DingoSerialTest, doubleSchemaPosLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -839,8 +909,8 @@ TEST_F(DingoSerialTest, doubleSchemaPosLeBe) {
     EXPECT_EQ(bs17, key_data_6);
     std::bitset<8> bs18(bs1.at(8));
     EXPECT_EQ(bs18, key_data_7);
-    Buf decode_buf(bs1, this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<double>(decode_data));
   }
 
@@ -913,7 +983,7 @@ TEST_F(DingoSerialTest, doubleSchemaPosFakeLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, !this->le);
+    KeyBuf encode_buf(100, !this->le);
     schema.EncodeKey(data1, encode_buf);
     std::string bs1 = encode_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
@@ -934,7 +1004,7 @@ TEST_F(DingoSerialTest, doubleSchemaPosFakeLeBe) {
     EXPECT_EQ(bs17, key_data_6);
     std::bitset<8> bs18(bs1.at(8));
     EXPECT_EQ(bs18, key_data_7);
-    Buf decode_buf(bs1, !this->le);
+    KeyBuf decode_buf(bs1, !this->le);
     auto decode_data = schema.DecodeKey(decode_buf);
     EXPECT_EQ(data1, std::any_cast<double>(decode_data));
   }
@@ -1003,9 +1073,9 @@ TEST_F(DingoSerialTest, doubleSchemaNegLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -1098,9 +1168,9 @@ TEST_F(DingoSerialTest, doubleSchemaNegFakeLeBe) {
     schema.SetIsLe(false);
   }
   {
-    Buf encode_buf(1, !this->le);
-    schema.EncodeKey(data1, encode_buf);
-    std::string bs1 = encode_buf.GetString();
+    KeyBuf encode_key_buf(100, !this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    std::string bs1 = encode_key_buf.GetString();
     std::bitset<8> bs10(bs1.at(0));
     EXPECT_EQ(bs10, not_null_tag);
     std::bitset<8> bs11(bs1.at(1));
@@ -1119,8 +1189,8 @@ TEST_F(DingoSerialTest, doubleSchemaNegFakeLeBe) {
     EXPECT_EQ(bs17, key_data_6);
     std::bitset<8> bs18(bs1.at(8));
     EXPECT_EQ(bs18, key_data_7);
-    Buf decode_buf(bs1, !this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf decode_key_buf(bs1, !this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     EXPECT_EQ(data1, std::any_cast<double>(decode_data));
   }
 
@@ -1159,10 +1229,10 @@ TEST_F(DingoSerialTest, longSchema) {
     schema.SetAllowNull(false);
     schema.SetIsKey(true);
     int64_t data1 = 1543234;
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data1, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(data1, encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_TRUE(decode_data.has_value());
     EXPECT_EQ(data1, std::any_cast<int64_t>(decode_data));
   }
@@ -1197,10 +1267,10 @@ TEST_F(DingoSerialTest, longSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(true);
     schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeKey(std::any(), encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    EXPECT_FALSE(schema.DecodeKey(decode_buf).has_value());
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(std::any(), encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    EXPECT_FALSE(schema.DecodeKey(decode_key_buf).has_value());
   }
 }
 
@@ -1211,10 +1281,10 @@ TEST_F(DingoSerialTest, doubleSchema) {
     schema.SetAllowNull(false);
     schema.SetIsKey(true);
     double data = 154.3234;
-    Buf encode_buf(1, this->le);
-    schema.EncodeKey(data, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
+    KeyBuf encode_key_buf(9, this->le);
+    schema.EncodeKey(data, encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_TRUE(decode_data.has_value());
     EXPECT_EQ(data, std::any_cast<double>(decode_data));
   }
@@ -1249,10 +1319,10 @@ TEST_F(DingoSerialTest, doubleSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(true);
     schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeKey(std::any(), encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    EXPECT_FALSE(schema.DecodeKey(decode_buf).has_value());
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(std::any(), encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+    EXPECT_FALSE(schema.DecodeKey(decode_key_buf).has_value());
   }
 }
 
@@ -1262,16 +1332,16 @@ TEST_F(DingoSerialTest, stringSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(false);
     schema.SetIsKey(true);
-    Buf encode_buf(1, this->le);
+    KeyBuf encode_key_buf(117, this->le);
 
     std::string data =
         "test address test 中文 表情😊🏷️👌 test "
         "测试测试测试三🤣😂😁🐱‍🐉👏";
 
-    schema.EncodeKey(data, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
+    schema.EncodeKey(data, encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
 
-    auto decode_data = schema.DecodeKey(decode_buf);
+    auto decode_data = schema.DecodeKey(decode_key_buf);
     ASSERT_TRUE(decode_data.has_value());
     EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
   }
@@ -1310,9 +1380,84 @@ TEST_F(DingoSerialTest, stringSchema) {
     schema.SetIndex(0);
     schema.SetAllowNull(true);
     schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeKey(std::any(), encode_buf);
+    KeyBuf encode_key_buf(100, this->le);
+    schema.EncodeKey(std::any(), encode_key_buf);
+    KeyBuf decode_buf(encode_key_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeKey(decode_buf);
+
+    EXPECT_FALSE(decode_data.has_value());
+  }
+}
+
+TEST_F(DingoSerialTest, decimalSchema) {
+  {
+    //Test key.
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(false);
+    schema.SetIsKey(false);
+    schema.SetPrecision(10);
+    schema.SetScale(4);
+    Buf encode_buf(1, this->le);
+    KeyBuf encode_key_buf(100, this->le);
+
+    std::string data = "12.34";
+    std::string expected = "12.3400";
+
+    schema.EncodeKey(data, encode_key_buf);
+    KeyBuf decode_key_buf(encode_key_buf.GetString(), this->le);
+
+    auto decode_data = schema.DecodeKey(decode_key_buf);
+    ASSERT_TRUE(decode_data.has_value());
+
+    std::cout << expected << " " << std::any_cast<std::string>(decode_data) << std::endl;
+    EXPECT_EQ(expected, std::any_cast<std::string>(decode_data));
+  }
+
+  {
+    //Test value.
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(false);
+    schema.SetPrecision(10);
+    schema.SetScale(4);
+
+    std::string data = "12.34";
+
+    Buf encode_buf(1, this->le);
+    schema.EncodeValue(data, encode_buf);
     Buf decode_buf(encode_buf.GetString(), this->le);
+    auto decode_data = schema.DecodeValue(decode_buf);
+
+    ASSERT_TRUE(decode_data.has_value());
+    EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
+  }
+
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(false);
+    schema.SetPrecision(10);
+    schema.SetScale(4);
+
+    Buf encode_buf(1, this->le);
+    int size = schema.EncodeValue(std::any(), encode_buf);
+    EXPECT_EQ(0, size);
+  }
+
+  {
+    DingoSchema<DecimalString> schema;
+    schema.SetIndex(11);
+    schema.SetAllowNull(true);
+    schema.SetIsKey(true);
+    schema.SetPrecision(10);
+    schema.SetScale(4);
+
+    KeyBuf encode_buf(100, this->le);
+    schema.EncodeKey(std::any(), encode_buf);
+    KeyBuf decode_buf(encode_buf.GetString(), this->le);
     auto decode_data = schema.DecodeKey(decode_buf);
 
     EXPECT_FALSE(decode_data.has_value());
@@ -1433,40 +1578,66 @@ TEST_F(DingoSerialTest, recordTest) {
     auto r1 = record1.at(i);
     auto r2 = record2.at(i);
 
-    ASSERT_TRUE(r1.has_value() == r1.has_value());
+    ASSERT_TRUE(r1.has_value() == r2.has_value());
 
     switch (type) {
       case BaseSchema::kBool: {
         if (r1.has_value() && r2.has_value()) {
-          EXPECT_EQ(std::any_cast<bool>(r1), std::any_cast<bool>(r2));
+          bool const result1 = std::any_cast<bool>(r1);
+          bool const result2 = std::any_cast<bool>(r2);
+          std::cout << "kBool - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
         }
         break;
       }
       case BaseSchema::kInteger: {
         if (r1.has_value() && r2.has_value()) {
-          EXPECT_EQ(std::any_cast<int32_t>(r1), std::any_cast<int32_t>(r2));
+          int32_t const result1 = std::any_cast<int32_t>(r1);
+          int32_t const result2 = std::any_cast<int32_t>(r2);
+          std::cout << "kInteger - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
         }
 
         break;
       }
       case BaseSchema::kLong: {
         if (r1.has_value() && r2.has_value()) {
-          EXPECT_EQ(std::any_cast<int64_t>(r1), std::any_cast<int64_t>(r2));
+          int64_t const result1 = std::any_cast<int64_t>(r1);
+          int64_t const result2 = std::any_cast<int64_t>(r2);
+          std::cout << "kLong - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
         }
 
         break;
       }
       case BaseSchema::kDouble: {
         if (r1.has_value() && r2.has_value()) {
-          EXPECT_EQ(std::any_cast<double>(r1), std::any_cast<double>(r2));
+          double const result1 = std::any_cast<double>(r1);
+          double const result2 = std::any_cast<double>(r2);
+          std::cout << "kDouble - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
         }
 
         break;
       }
       case BaseSchema::kString: {
         if (r1.has_value() && r2.has_value()) {
-          EXPECT_EQ(std::any_cast<std::string>(r1),
-                    std::any_cast<std::string>(r2));
+          std::string const result1 = std::any_cast<std::string>(r1);
+          std::string const result2 = std::any_cast<std::string>(r2);
+          std::cout << "kString - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        if (r1.has_value() && r2.has_value()) {
+          std::string const result1 = std::any_cast<std::string>(r1);
+          std::string const result2 = std::any_cast<std::string>(r2);
+          std::cout << "kDecimal - r1:" << result1 << " r2:" << result2 << std::endl;
+
+          std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+          EXPECT_EQ(targetValue, result2);
         }
 
         break;
@@ -1479,14 +1650,14 @@ TEST_F(DingoSerialTest, recordTest) {
   }
   // delete record2;
 
-  std::vector<int> index{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  std::unordered_map<int, int> index_serial{{0, 0}, {1, 1}, {2, 2}, {3,3}, {4,4} ,{5, 5}, {6,6}, {7,7}, {8,8}, {9,9},{10,10} };
-  std::vector<int> index_temp{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  //Index with full columns.
+  std::unordered_map<int, int> index_serial{{0, 0}, {1, 1}, {2, 2}, {3,3},{4,4}, {5,5} ,{6,6}, {7,7}, {8,8}, {9,9}, {10,10},{11,11},{12,12}  };
+  std::vector<int> index_temp{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12};
   std::vector<std::any> record3;
   rd.Decode(key, value, index_serial, record3);
   i = 0;
   for (const auto& bs : schemas) {
-    if (bs->GetIndex() == 0 || bs->GetIndex() == 1 || bs->GetIndex() == 4 || bs->GetIndex() == 7 || bs->GetIndex() == 10 || bs->GetIndex() == 11) {
+    if (bs->GetIndex() == 0 || bs->GetIndex() == 1 || bs->GetIndex() == 3 || bs->GetIndex() == 5 || bs->GetIndex() == 8 || bs->GetIndex() == 11 || bs->GetIndex() == 12) {
       EXPECT_EQ(bs->GetPrecision(), 10);
       EXPECT_EQ(bs->GetScale(), 4);
     } else {
@@ -1567,6 +1738,143 @@ TEST_F(DingoSerialTest, recordTest) {
         }
         break;
       }
+      case BaseSchema::kDecimal: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+            EXPECT_EQ(targetValue, std::any_cast<std::string>(r2));
+          }
+          i++;
+                          }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  //Index with part columns.
+  std::unordered_map<int, int> index_serial1{{0, 0}, {1, 1}, {3, 2}, {4,3}, {6, 4},  {9,5}, {10,6},{12,7}  };
+  std::vector<int> index1{0,  1,  3, 4,  6,  9,  10,  12};
+  std::vector<int> index1_temp{0,   1,  2,  3,  4,  5,  6, 7};
+  std::vector<std::any> record4;
+  rd.Decode(key, value, index_serial1, record4);
+  i = 0;
+  for (const auto& bs : schemas) {
+    if (index_serial1.find(bs->GetIndex()) == index_serial1.end()) {
+      continue;
+    }
+
+    if (bs->GetIndex() == 0 || bs->GetIndex() == 1 || bs->GetIndex() == 3 || bs->GetIndex() == 5 || bs->GetIndex() == 8 || bs->GetIndex() == 11 || bs->GetIndex() == 12) {
+      EXPECT_EQ(bs->GetPrecision(), 10);
+      EXPECT_EQ(bs->GetScale(), 4);
+    } else {
+      EXPECT_EQ(bs->GetPrecision(), 0);
+      EXPECT_EQ(bs->GetScale(), 0);
+    }
+
+    int indexInSchemas = 0;
+    for (const auto& pair : index_serial1) {
+      if (pair.second == i) {
+        indexInSchemas = pair.first;
+        break;
+      }
+    }
+
+    BaseSchema::Type type = bs->GetType();
+    switch (type) {
+      case BaseSchema::kBool: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<bool>(r1), std::any_cast<bool>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int32_t>(r1), std::any_cast<int32_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kLong: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int64_t>(r1), std::any_cast<int64_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDouble: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<double>(r1), std::any_cast<double>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kString: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<std::string>(r1),
+                      std::any_cast<std::string>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+            EXPECT_EQ(targetValue, std::any_cast<std::string>(r2));
+          }
+          i++;
+                          }
+        break;
+      }
       default: {
         break;
       }
@@ -1577,62 +1885,332 @@ TEST_F(DingoSerialTest, recordTest) {
   DeleteRecords();
 }
 
-TEST_F(DingoSerialTest, decimalSchema) {
-  {
-    DingoSchema<DecimalString> schema;
-    schema.SetIndex(11);
-    schema.SetAllowNull(true);
-    schema.SetIsKey(false);
-    Buf encode_buf(1, this->le);
+//Test case that the key buffer need enlarged.
+TEST_F(DingoSerialTest, memAutoIncTest) {
+  InitVector();
+  auto schemas = GetSchemas();
+  RecordEncoderV2 re(0, schemas, 0L, this->le);
+  InitRecordForMemAutoInc();
 
-    std::string data = "12.34";
+  auto record1 = GetRecord();
+  std::string key, value;
 
-    schema.EncodeKey(data, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
+  // encode key-value.
+  re.Encode('r', record1, key, value);
 
-    auto decode_data = schema.DecodeKey(decode_buf);
-    ASSERT_TRUE(decode_data.has_value());
-    EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
+  RecordDecoderV2 rd(0, schemas, 0L, this->le);
+  std::vector<std::any> record2;
+  rd.Decode(key, value, record2);
+  int i = 0;
+  for (const auto& bs : schemas) {
+    BaseSchema::Type type = bs->GetType();
+    auto r1 = record1.at(i);
+    auto r2 = record2.at(i);
+
+    ASSERT_TRUE(r1.has_value() == r2.has_value());
+
+    switch (type) {
+      case BaseSchema::kBool: {
+        if (r1.has_value() && r2.has_value()) {
+          bool const result1 = std::any_cast<bool>(r1);
+          bool const result2 = std::any_cast<bool>(r2);
+          std::cout << "kBool - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        if (r1.has_value() && r2.has_value()) {
+          int32_t const result1 = std::any_cast<int32_t>(r1);
+          int32_t const result2 = std::any_cast<int32_t>(r2);
+          std::cout << "kInteger - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+
+        break;
+      }
+      case BaseSchema::kLong: {
+        if (r1.has_value() && r2.has_value()) {
+          int64_t const result1 = std::any_cast<int64_t>(r1);
+          int64_t const result2 = std::any_cast<int64_t>(r2);
+          std::cout << "kLong - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+
+        break;
+      }
+      case BaseSchema::kDouble: {
+        if (r1.has_value() && r2.has_value()) {
+          double const result1 = std::any_cast<double>(r1);
+          double const result2 = std::any_cast<double>(r2);
+          std::cout << "kDouble - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+
+        break;
+      }
+      case BaseSchema::kString: {
+        if (r1.has_value() && r2.has_value()) {
+          std::string const result1 = std::any_cast<std::string>(r1);
+          std::string const result2 = std::any_cast<std::string>(r2);
+          std::cout << "kString - r1:" << result1 << " r2:" << result2 << std::endl;
+          EXPECT_EQ(result1, result2);
+        }
+
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        if (r1.has_value() && r2.has_value()) {
+          std::string const result1 = std::any_cast<std::string>(r1);
+          std::string const result2 = std::any_cast<std::string>(r2);
+          std::cout << "kString - r1:" << result1 << " r2:" << result2 << std::endl;
+          std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+          EXPECT_EQ(targetValue, result2);
+        }
+
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    i++;
+  }
+  // delete record2;
+
+  //Index with full columns.
+  std::unordered_map<int, int> index_serial{{0, 0}, {1, 1}, {2, 2}, {3,3}, {4,4}, {5,5} ,{6,6}, {7,7}, {8,8}, {9,9}, {10,10},{11,11},{12,12}  };
+  std::vector<int> index_temp{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+  std::vector<std::any> record3;
+  rd.Decode(key, value, index_serial, record3);
+  i = 0;
+  for (const auto& bs : schemas) {
+    if (bs->GetIndex() == 0 || bs->GetIndex() == 1 || bs->GetIndex() == 3 || bs->GetIndex() == 5 || bs->GetIndex() == 8 || bs->GetIndex() == 11 || bs->GetIndex() == 12) {
+      EXPECT_EQ(bs->GetPrecision(), 10);
+      EXPECT_EQ(bs->GetScale(), 4);
+    } else {
+      EXPECT_EQ(bs->GetPrecision(), 0);
+      EXPECT_EQ(bs->GetScale(), 0);
+    }
+
+    BaseSchema::Type type = bs->GetType();
+    switch (type) {
+      case BaseSchema::kBool: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<bool>(r1), std::any_cast<bool>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int32_t>(r1), std::any_cast<int32_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kLong: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int64_t>(r1), std::any_cast<int64_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDouble: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<double>(r1), std::any_cast<double>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kString: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<std::string>(r1),
+                      std::any_cast<std::string>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        if (binary_search(index_temp.begin(), index_temp.end(),
+                          bs->GetIndex())) {
+          auto r1 = record1.at(bs->GetIndex());
+          auto r2 = record3.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+            EXPECT_EQ(targetValue, std::any_cast<std::string>(r2));
+          }
+          i++;
+                          }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
   }
 
-  {
-    DingoSchema<DecimalString> schema;
-    schema.SetIndex(11);
-    schema.SetAllowNull(true);
-    schema.SetIsKey(false);
-    std::string data = "12.34";
+  //Index with part columns.
+  std::unordered_map<int, int> index_serial1{{0, 0}, {1, 1}, {3, 2}, {4,3}, {6, 4},  {9,5}, {10,6},{12,7}  };
+  std::vector<int> index1{0,  1,  3, 4,  6,  9,  10,  12};
+  std::vector<int> index1_temp{0,   1,  2,  3,  4,  5,  6, 7};
+  std::vector<std::any> record4;
+  rd.Decode(key, value, index_serial1, record4);
+  i = 0;
+  for (const auto& bs : schemas) {
+    if (index_serial1.find(bs->GetIndex()) == index_serial1.end()) {
+      continue;
+    }
 
-    Buf encode_buf(1, this->le);
-    schema.EncodeValue(data, encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeValue(decode_buf);
+    if (bs->GetIndex() == 0 || bs->GetIndex() == 1|| bs->GetIndex() == 3 || bs->GetIndex() == 5 || bs->GetIndex() == 8 || bs->GetIndex() == 11 || bs->GetIndex() == 12) {
+      EXPECT_EQ(bs->GetPrecision(), 10);
+      EXPECT_EQ(bs->GetScale(), 4);
+    } else {
+      EXPECT_EQ(bs->GetPrecision(), 0);
+      EXPECT_EQ(bs->GetScale(), 0);
+    }
 
-    ASSERT_TRUE(decode_data.has_value());
-    EXPECT_EQ(data, std::any_cast<std::string>(decode_data));
+    int indexInSchemas = 0;
+    for (const auto& pair : index_serial1) {
+      if (pair.second == i) {
+        indexInSchemas = pair.first;
+        break;
+      }
+    }
+
+    BaseSchema::Type type = bs->GetType();
+    switch (type) {
+      case BaseSchema::kBool: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<bool>(r1), std::any_cast<bool>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kInteger: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int32_t>(r1), std::any_cast<int32_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kLong: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<int64_t>(r1), std::any_cast<int64_t>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDouble: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<double>(r1), std::any_cast<double>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kString: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            EXPECT_EQ(std::any_cast<std::string>(r1),
+                      std::any_cast<std::string>(r2));
+          }
+          i++;
+        }
+        break;
+      }
+      case BaseSchema::kDecimal: {
+        if (binary_search(index1_temp.begin(), index1_temp.end(),
+                          indexInSchemas)) {
+          auto r1 = record1.at(indexInSchemas);
+          auto r2 = record4.at(i);
+          ASSERT_TRUE(r1.has_value() == r1.has_value());
+
+          if (r1.has_value() && r2.has_value()) {
+            std::string targetValue = bs->IsKey() ? "12.3400" : "12.34";
+            EXPECT_EQ(targetValue, std::any_cast<std::string>(r2));
+          }
+          i++;
+                          }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
   }
 
-  {
-    DingoSchema<DecimalString> schema;
-    schema.SetIndex(11);
-    schema.SetAllowNull(true);
-    schema.SetIsKey(false);
-
-    Buf encode_buf(1, this->le);
-    int size = schema.EncodeValue(std::any(), encode_buf);
-    EXPECT_EQ(0, size);
-  }
-
-  {
-    DingoSchema<DecimalString> schema;
-    schema.SetIndex(11);
-    schema.SetAllowNull(true);
-    schema.SetIsKey(true);
-    Buf encode_buf(100, this->le);
-    schema.EncodeKey(std::any(), encode_buf);
-    Buf decode_buf(encode_buf.GetString(), this->le);
-    auto decode_data = schema.DecodeKey(decode_buf);
-
-    EXPECT_FALSE(decode_data.has_value());
-  }
+  DeleteSchemas();
+  DeleteRecords();
 }
+
 

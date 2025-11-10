@@ -22,7 +22,7 @@ if(WITH_DEBUG_SYMBOLS)
 endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-#set(BUILD_UNIT_TESTS true)
+set(BUILD_UNIT_TESTS false)
 
 include(FindThreads)
 
