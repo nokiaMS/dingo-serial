@@ -19,6 +19,7 @@
 #include "serial/schema/V2/base_schema.h"
 #include "serial/schema/V2/boolean_list_schema.h"
 #include "serial/schema/V2/boolean_schema.h"
+#include "serial/schema/V2/decimal_schema.h"
 #include "serial/schema/V2/dingo_schema.h"
 #include "serial/schema/V2/double_list_schema.h"
 #include "serial/schema/V2/double_schema.h"
@@ -30,8 +31,6 @@
 #include "serial/schema/V2/long_schema.h"
 #include "serial/schema/V2/string_list_schema.h"
 #include "serial/schema/V2/string_schema.h"
-#include "serial/schema/V2/decimal_schema.h"
-#include "serial/schema/V2/decimal_list_schema.h"
 #include "serial/schema/base_schema.h"
 #include "serial/utils/common.h"
 

@@ -44,6 +44,9 @@ int DingoSchema<std::string>::EncodeBytesComparable(const std::string& data,
   }
   buf.Write(kMarker - pad_count);
 
+  int len = data.size();
+  int encodedLen = group_num * 9;
+
   return group_num * 9;
 }
 
@@ -109,7 +112,7 @@ void DingoSchema<std::string>::DecodeBytesNotComparable(Buf& buf,
 }
 
 int DingoSchema<std::string>::GetLengthForKey() {
-  throw std::runtime_error("String unsupport length");
+  return 100;  //A preferred length. The buffer should be enlarged if it is not enough.
 }
 
 int DingoSchema<std::string>::GetLengthForValue() {

@@ -60,7 +60,7 @@ class Buf {
    */
 
   // byte writter and getter.
-  void Write(uint8_t data);
+  virtual void Write(uint8_t data);
   void WriteByte(size_t pos, uint8_t data);
   void WriteWithNegation(uint8_t data);
   uint8_t Peek();
@@ -69,31 +69,36 @@ class Buf {
   // uint8_t ReverseReadByte(size_t pos);
 
   // short writter and getter.
-  void WriteShort(int16_t data);
+  virtual void WriteShort(int16_t data);
   void WriteShort(size_t pos, int16_t data);
   int16_t ReadShort();
   int16_t ReadShort(int pos);
   // uint16_t ReverseReadShort(int pos);
+  void ReverseWrite(uint8_t b);
+  void ReverseWriteInt(int32_t i);
 
   // int writter and getter.
-  void WriteInt(int32_t data);
+  virtual void WriteInt(int32_t data);
   void WriteInt(size_t pos, int32_t data);
   int32_t PeekInt();
   int32_t ReadInt();
   int32_t ReadInt(int pos);
   // int32_t ReverseReadInt(int pos);
+  void ReverseSkipInt();
+  uint8_t ReverseRead();
+  int32_t ReverseReadInt();
 
   // long writter and getter.
-  void WriteLong(int64_t data);
-  void WriteLongWithNegation(int64_t data);
-  void WriteLongWithFirstBitNegation(int64_t data);
+  virtual void WriteLong(int64_t data);
+  virtual void WriteLongWithNegation(int64_t data);
+  virtual void WriteLongWithFirstBitNegation(int64_t data);
   int64_t PeekLong();
   int64_t ReadLong();
   int64_t ReadLong(int pos);
   int64_t ReadLongWithFirstBitNegation();
 
   // string writter and getter.
-  void WriteString(const std::string& data);
+  virtual void WriteString(const std::string& data);
   const std::string& GetString();
   void GetString(std::string& s);
   void GetString(std::string* s);
@@ -125,10 +130,11 @@ class Buf {
     read_offset_ = offset;
   }
 
- private:
+ protected:
   bool le_{true};
 
   size_t read_offset_{0};
+  int reverse_pos_ = 0;
 
   // for memory comparable buf_ is big endian
   std::string buf_;

@@ -85,6 +85,7 @@ class RecordDecoderV2 {
   bool CheckPrefix(Buf& buf) const;
   bool CheckReverseTag(Buf& buf) const;
   bool CheckSchemaVersion(Buf& buf) const;
+  bool CheckReverseTagForKey(Buf& buf) const;
 
   bool le_;
   Buf key_buf_;
