@@ -1380,12 +1380,12 @@ TEST_F(SchemaTest, decimalType) {
 
     // for key.
     KeyBuf buf_key(100, IsLE());
-    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
 
     KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
     int size = schema->SkipKey(decode_key_buf);
-    EXPECT_EQ(5, size);
+    EXPECT_EQ(9, size);
 
     auto actual_data_key = schema->DecodeKey(decode_key_buf);
     EXPECT_EQ("23.2300", std::any_cast<std::string>(actual_data_key));
@@ -1416,12 +1416,12 @@ TEST_F(SchemaTest, decimalType) {
 
     // for key.
     KeyBuf buf_key(100, IsLE());
-    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));
-    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));
 
     KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
     int size = schema->SkipKey(decode_key_buf);
-    EXPECT_EQ(5, size);
+    EXPECT_EQ(9, size);
 
     auto actual_data_key = schema->DecodeKey(decode_key_buf);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");
@@ -1450,12 +1450,12 @@ TEST_F(SchemaTest, decimalType) {
 
     // for key.
     KeyBuf buf_key(100, IsLE());
-    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));  // with null flag in key.
-    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));  // with null flag in key.
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));  // with null flag in key.
 
     KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
     int size = schema->SkipKey(decode_key_buf);
-    EXPECT_EQ(6, size);
+    EXPECT_EQ(10, size);
 
     auto actual_data_key = schema->DecodeKey(decode_key_buf);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");
@@ -1486,12 +1486,12 @@ TEST_F(SchemaTest, decimalType) {
 
     // for key.
     KeyBuf buf_key(100, IsLE());
-    EXPECT_EQ(5, schema->EncodeKey(data1, buf_key));
-    EXPECT_EQ(5, schema->EncodeKey(data2, buf_key));
+    EXPECT_EQ(9, schema->EncodeKey(data1, buf_key));
+    EXPECT_EQ(9, schema->EncodeKey(data2, buf_key));
 
     KeyBuf decode_key_buf(buf_key.GetString(), IsLE());
     int size = schema->SkipKey(decode_key_buf);
-    EXPECT_EQ(6, size);
+    EXPECT_EQ(10, size);
 
     auto actual_data_key = schema->DecodeKey(decode_key_buf);
     EXPECT_EQ(std::any_cast<std::string>(actual_data_key), "23.2300");

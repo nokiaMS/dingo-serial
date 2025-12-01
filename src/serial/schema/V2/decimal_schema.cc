@@ -90,22 +90,66 @@ int DingoSchema<DecimalString>::SkipValue(Buf& buf) {
   return size + 4;
 }
 
+int DingoSchema<DecimalString>::EncodeBytesComparable(const std::string& data,
+                                                    Buf& buf) {
+  for (uint32_t i = 0; i < data.size(); ++i) {
+    buf.Write(data.at(i));
+    if ((i + 1) % kGroupSize == 0) {
+      buf.Write(kMarker);
+    }
+  }
+
+  int group_num = data.size() / kGroupSize + 1;
+  int pad_count = group_num * kGroupSize - data.size();
+  for (int i = 0; i < pad_count; ++i) {
+    buf.Write(0);
+  }
+  buf.Write(kMarker - pad_count);
+
+  int len = data.size();
+  int encodedLen = group_num * 9;
+
+  return group_num * 9;
+}
+
+int DingoSchema<DecimalString>::DecodeBytesComparable(Buf& buf,
+                                                    std::string& data) {
+  int size = 0;
+  for (;;) {
+    if (buf.RestReadableSize() < kPadGroupSize) {
+      return -1;
+    }
+
+    uint8_t marker = buf.Read(buf.ReadOffset() + kGroupSize);
+
+    int pad_count = kMarker - marker;
+    for (int i = 0; i < kGroupSize - pad_count; ++i) {
+      data.push_back(buf.Read());
+    }
+
+    size += kPadGroupSize;
+    if (pad_count != 0) {
+      for (int i = 0; i < pad_count; ++i) {
+        if (buf.Read() != 0) {
+          return -1;
+        }
+      }
+      buf.Skip(1);  // skip marker
+
+      break;
+    }
+
+    buf.Skip(1);  // skip marker
+  }
+
+  return size;
+}
+
 int DingoSchema<DecimalString>::internalEncodeKey(std::string& data, Buf& buf) {
   MyDecimal myDecimal = MyDecimal(data, (int)precision_, (int)scale_);
   std::string toBinValue = myDecimal.toBin();
-  int len = 0;
 
-  for (int i = 0; i < toBinValue.length(); ++i) {
-    buf.Write((char) toBinValue[i]);
-    len++;
-  }
-
-  /*
-  while (char b : toBinValue) {
-    buf.Write((char) b);
-    len++;
-  }
-  */
+  int len = EncodeBytesComparable(toBinValue, buf);
   return len;
 }
 
@@ -154,12 +198,8 @@ int DingoSchema<DecimalString>::EncodeValue(const std::any& data, Buf& buf) {
 }
 
 std::string DingoSchema<DecimalString>::internalReadDecimal(Buf& buf) {
-  int length = buf.ReverseReadInt();
   std::string data;
-  data.resize(length);  //= new char[length];
-  for (int i = 0; i < length; ++i) {
-    data[i] = buf.Read();
-  }
+  DecodeBytesComparable(buf, data);
 
   return MyDecimal(data, (int)this->precision_, (int)this->scale_, true).decimalToString();
 }
@@ -172,13 +212,6 @@ std::any DingoSchema<DecimalString>::DecodeKey(Buf& buf) {
   }
 
   std::string data = internalReadDecimal(buf);
-  /*
-  int size = DecodeBytesComparable(buf, data);
-  if (size == -1) {
-    throw std::runtime_error("decode comparable string error.");
-  }
-  */
-
   return std::move(std::any(std::move(data)));
 }
 
